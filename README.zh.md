@@ -6,7 +6,7 @@
 
 灵感来自 [@Saccc_c](https://x.com/Saccc_c) 的 Codex 记忆技巧。
 
-![Obsidian Memory 面板](screenshot-panel.png)
+![Obsidian Memory 面板](assets/screenshot-panel.png)
 
 ---
 

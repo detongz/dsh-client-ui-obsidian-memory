@@ -6,7 +6,7 @@ A DSH client plugin that renders a file-tree browser inside the sidebar, connect
 
 Inspired by [@Saccc_c](https://x.com/Saccc_c)'s Codex memory techniques.
 
-![Obsidian Memory Panel](screenshot-panel.png)
+![Obsidian Memory Panel](assets/screenshot-panel.png)
 
 ---
 

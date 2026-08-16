@@ -1,4 +1,4 @@
-# dsh-obsidian-memory
+# dsh-client-ui-obsidian-memory
 
 > 🧠 把 Obsidian 变成 DeepSeek Harness 的持久记忆库
 
@@ -45,11 +45,11 @@ Codex/
 
 ```bash
 # 方式 A：用 npx 直接跑（推荐）
-npx dsh-obsidian-memory-server --vault /path/to/your/Obsidian/Codex
+npx dsh-client-ui-obsidian-memory-server --vault /path/to/your/Obsidian/Codex
 
 # 方式 B：从源码跑
-git clone https://github.com/YOUR_USERNAME/dsh-obsidian-memory.git
-cd dsh-obsidian-memory/mcp-server
+git clone https://github.com/detongz/dsh-client-ui-obsidian-memory.git
+cd dsh-client-ui-obsidian-memory/mcp-server
 npm install && npm run build
 node dist/preview-server.js --vault /path/to/your/Obsidian/Codex
 ```
@@ -63,17 +63,17 @@ node dist/preview-server.js --vault /path/to/your/Obsidian/Codex
 cd /path/to/deepseek-harness
 
 # 安装插件
-npm install dsh-obsidian-memory
+npm install dsh-client-ui-obsidian-memory
 
 # 或者如果你用 pnpm
-pnpm add dsh-obsidian-memory
+pnpm add dsh-client-ui-obsidian-memory
 ```
 
 在 `packages/bundle/web-app/cordis.patch.yml` 里添加：
 
 ```yaml
     - id: ui-obsidian-memory
-      name: dsh-obsidian-memory
+      name: dsh-client-ui-obsidian-memory
 ```
 
 > **前置要求**：你的 DSH 版本需要包含 `ui-sidebar` 对 `sidebar.obsidian-memory` slot 的支持（我们已向 deepseek-harness 提交了相关 PR，若未合并可参考下方「手动补丁」）。
@@ -143,7 +143,7 @@ dsh web
 
 | 组件 | 职责 |
 |------|------|
-| **DSH Plugin** (`dsh-obsidian-memory`) | 浏览器端：侧边栏面板、文件树渲染 |
+| **DSH Plugin** (`dsh-client-ui-obsidian-memory`) | 浏览器端：侧边栏面板、文件树渲染 |
 | **Preview Server** (`mcp-server/`) | Node 端：读取本地 vault，提供 `/api/tree` HTTP API |
 | **Obsidian Vault** | 数据源：Markdown 文件 + 文件夹 |
 
@@ -153,7 +153,7 @@ dsh web
 
 | 现象 | 原因 | 解决 |
 |------|------|------|
-| 面板显示 "Preview server offline (port 3456)" | preview server 没启动 | 运行 `npx dsh-obsidian-memory-server --vault <path>` |
+| 面板显示 "Preview server offline (port 3456)" | preview server 没启动 | 运行 `npx dsh-client-ui-obsidian-memory-server --vault <path>` |
 | 面板完全不出现 | slot 未注册 | 确认 `cordis.patch.yml` 里有 `ui-obsidian-memory` 行，且 DSH 版本支持该 slot |
 | 文件树为空 | vault 路径错误或目录为空 | 检查 `--vault` 路径指向的是 `Codex/` 文件夹 |
 | 点击文件没反应 | `window.dshOpenFile` 未注入 | 这是已知限制，需要 DSH 提供文件打开 API |
@@ -163,8 +163,8 @@ dsh web
 ## 开发
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/dsh-obsidian-memory.git
-cd dsh-obsidian-memory/plugin
+git clone https://github.com/detongz/dsh-client-ui-obsidian-memory.git
+cd dsh-client-ui-obsidian-memory/plugin
 npm install
 npm run build        # 输出 lib/client.js
 npm run watch        # 开发模式自动重建

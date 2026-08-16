@@ -1,0 +1,5 @@
+# Cordis patch for dsh-client-ui-obsidian-memory
+# Registers the Obsidian Memory sidebar panel into DSH.
+- insert:
+    - id: ui-obsidian-memory
+      name: dsh-client-ui-obsidian-memory

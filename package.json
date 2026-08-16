@@ -1,0 +1,66 @@
+{
+  "name": "dsh-obsidian-memory",
+  "version": "0.1.0",
+  "description": "Obsidian Memory sidebar panel for DeepSeek Harness — vault file tree browser for Codex memory",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-locale"
+      ],
+      "platform": "web"
+    }
+  },
+  "scripts": {
+    "build": "rolldown -c rolldown.config.ts",
+    "watch": "rolldown -c rolldown.config.ts --watch"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "obsidian",
+    "memory",
+    "codex",
+    "plugin"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/dsh-obsidian-memory.git"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-client-locale": ">=0.1.0",
+    "@deepseek-ai/dsh-client-runtime": ">=0.1.0",
+    "@deepseek-ai/dsh-client-ui-sidebar": ">=0.1.0",
+    "@deepseek-ai/dsh-client-ui-slots": ">=0.1.0",
+    "react": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-client-locale": { "optional": true },
+    "@deepseek-ai/dsh-client-runtime": { "optional": true },
+    "@deepseek-ai/dsh-client-ui-sidebar": { "optional": true },
+    "@deepseek-ai/dsh-client-ui-slots": { "optional": true },
+    "react": { "optional": true }
+  },
+  "devDependencies": {
+    "lightningcss": "^1.29.0",
+    "rolldown": "^1.1.0"
+  }
+}

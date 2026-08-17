@@ -1,11 +1,10 @@
 import { readFile, writeFile, appendFile, readdir, stat, mkdir } from 'node:fs/promises'
-import { join, resolve, relative } from 'node:path'
+import { join, resolve, relative, dirname } from 'node:path'
 
 export interface MemoryConfig {
   vaultPath: string
 }
 
-/** Resolve a relative path inside the vault, with traversal guard. */
 export function resolveVaultPath(vaultPath: string, filePath: string): string {
   const resolved = resolve(join(vaultPath, filePath))
   const rel = relative(vaultPath, resolved)
@@ -15,13 +14,11 @@ export function resolveVaultPath(vaultPath: string, filePath: string): string {
   return resolved
 }
 
-/** Read a file from the vault. */
 export async function readVaultFile(vaultPath: string, filePath: string): Promise<string> {
   const fullPath = resolveVaultPath(vaultPath, filePath)
   return readFile(fullPath, 'utf-8')
 }
 
-/** List entries in a vault directory. */
 export async function listVaultDir(
   vaultPath: string,
   dirPath: string = '',
@@ -31,7 +28,6 @@ export async function listVaultDir(
   return entries.map((e) => ({ name: e.name, type: e.isDirectory() ? 'directory' : 'file' }))
 }
 
-/** Recursively search vault files for query string. */
 export async function searchVault(
   vaultPath: string,
   query: string,
@@ -45,7 +41,6 @@ export async function searchVault(
       const relPath = baseRel ? `${baseRel}/${entry.name}` : entry.name
       const fullPath = join(dir, entry.name)
       if (entry.isDirectory()) {
-        // Skip common non-content directories
         if (['.git', '.obsidian', 'node_modules'].includes(entry.name)) continue
         await walk(fullPath, relPath)
       } else if (entry.isFile() && (entry.name.endsWith('.md') || entry.name.endsWith('.txt'))) {
@@ -75,26 +70,14 @@ export async function searchVault(
   return results
 }
 
-/** Write or overwrite a file in the vault. Creates parent directories if needed. */
 export async function writeVaultFile(vaultPath: string, filePath: string, content: string): Promise<void> {
   const fullPath = resolveVaultPath(vaultPath, filePath)
-  await mkdir(new URL('.', 'file://' + fullPath).pathname, { recursive: true })
+  await mkdir(dirname(fullPath), { recursive: true })
   await writeFile(fullPath, content, 'utf-8')
 }
 
-/** Append content to a file in the vault. Creates parent directories if needed. */
 export async function appendVaultFile(vaultPath: string, filePath: string, content: string): Promise<void> {
   const fullPath = resolveVaultPath(vaultPath, filePath)
-  await mkdir(new URL('.', 'file://' + fullPath).pathname, { recursive: true })
-  await appendFile(fullPath, content, 'utf-8')
-}
-export async function writeVaultFile(vaultPath: string, filePath: string, content: string): Promise<void> {
-  const fullPath = resolveVaultPath(vaultPath, filePath)
-  await writeFile(fullPath, content, 'utf-8')
-}
-
-/** Append content to a file in the vault. */
-export async function appendVaultFile(vaultPath: string, filePath: string, content: string): Promise<void> {
-  const fullPath = resolveVaultPath(vaultPath, filePath)
+  await mkdir(dirname(fullPath), { recursive: true })
   await appendFile(fullPath, content, 'utf-8')
 }

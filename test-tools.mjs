@@ -3,7 +3,7 @@
  * Run: node --import tsx/esm test-tools.mjs
  */
 
-import { readVaultFile, listVaultDir, searchVault, writeVaultFile, appendVaultFile } from './src/tools/fs.ts'
+import { readVaultFile, listVaultDir, searchVault, writeVaultFile, appendVaultFile, resolveVaultPath } from './src/tools/fs.ts'
 
 const vaultPath = '/Users/zdt/Documents/Obsidian Vault'
 
@@ -50,7 +50,7 @@ async function test() {
   // 7. Cleanup
   console.log('7. Cleanup: removing test-note.md')
   const { unlink } = await import('node:fs/promises')
-  await unlink(new URL('Codex/notes/test-note.md', 'file://' + vaultPath + '/').pathname)
+  await unlink(resolveVaultPath(vaultPath, 'Codex/notes/test-note.md'))
   console.log('  ✅ Removed')
 
   console.log('\n=== All tests passed! ===')

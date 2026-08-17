@@ -6,11 +6,6 @@ import { basename } from 'node:path'
 const CSS_VIRTUAL_PREFIX = '\0dsh-css:'
 const CSS_VIRTUAL_SUFFIX = '.mjs'
 
-/**
- * Inline CSS Modules for DSH client bundles.
- * Compiles .module.css with lightningcss, injects a <style data-plugin> tag,
- * and exports the hashed class map.
- */
 function cssModulesInline(id: string): Plugin {
   return {
     name: 'dsh-css-modules-inline',
@@ -51,7 +46,6 @@ function cssModulesInline(id: string): Plugin {
   }
 }
 
-/** Platform modules that stay external in the DSH client bundle. */
 const CLIENT_EXTERNALS = [
   '@deepseek-ai/dsh-client-runtime/client',
   '@deepseek-ai/dsh-client-locale/client',
@@ -64,7 +58,6 @@ const CLIENT_EXTERNALS = [
 ]
 
 export default defineConfig([
-  // Host bundle
   {
     input: 'src/index.ts',
     output: {
@@ -73,13 +66,12 @@ export default defineConfig([
     },
     external: [],
   },
-  // Client bundle
   {
     input: 'src/client/index.ts',
     output: {
       file: 'lib/client.js',
       format: 'cjs',
-      banner: `window.__ModuleLoader__.load({ id: "dsh-obsidian-memory", factory: (require) => {`,
+      banner: 'window.__ModuleLoader__.load({ id: "dsh-obsidian-memory", factory: (require) => {',
       footer: 'return module.exports; } });',
       intro: 'var module = { exports: {} }; var exports = module.exports;',
       sourcemap: true,

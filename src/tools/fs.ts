@@ -1,4 +1,4 @@
-import { readFile, writeFile, appendFile, readdir, stat } from 'node:fs/promises'
+import { readFile, writeFile, appendFile, readdir, stat, mkdir } from 'node:fs/promises'
 import { join, resolve, relative } from 'node:path'
 
 export interface MemoryConfig {
@@ -75,7 +75,19 @@ export async function searchVault(
   return results
 }
 
-/** Write or overwrite a file in the vault. */
+/** Write or overwrite a file in the vault. Creates parent directories if needed. */
+export async function writeVaultFile(vaultPath: string, filePath: string, content: string): Promise<void> {
+  const fullPath = resolveVaultPath(vaultPath, filePath)
+  await mkdir(new URL('.', 'file://' + fullPath).pathname, { recursive: true })
+  await writeFile(fullPath, content, 'utf-8')
+}
+
+/** Append content to a file in the vault. Creates parent directories if needed. */
+export async function appendVaultFile(vaultPath: string, filePath: string, content: string): Promise<void> {
+  const fullPath = resolveVaultPath(vaultPath, filePath)
+  await mkdir(new URL('.', 'file://' + fullPath).pathname, { recursive: true })
+  await appendFile(fullPath, content, 'utf-8')
+}
 export async function writeVaultFile(vaultPath: string, filePath: string, content: string): Promise<void> {
   const fullPath = resolveVaultPath(vaultPath, filePath)
   await writeFile(fullPath, content, 'utf-8')

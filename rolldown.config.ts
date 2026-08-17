@@ -71,12 +71,12 @@ export default defineConfig([
     output: {
       file: 'lib/client.js',
       format: 'cjs',
-      banner: 'window.__ModuleLoader__.load({ id: "dsh-obsidian-memory", factory: (require) => {',
+      banner: 'window.__ModuleLoader__.load({ id: "@deepseek-ai/dsh-client-ui-obsidian-memory", factory: (require) => {',
       footer: 'return module.exports; } });',
       intro: 'var module = { exports: {} }; var exports = module.exports;',
       sourcemap: true,
     },
     external: CLIENT_EXTERNALS,
-    plugins: [cssModulesInline('dsh-obsidian-memory')],
+    plugins: [cssModulesInline('@deepseek-ai/dsh-client-ui-obsidian-memory')],
   },
 ])

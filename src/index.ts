@@ -1,6 +1,8 @@
 /**
  * Host-side tool plugin for Obsidian Memory.
  * Registers obsidian_memory_* tools so AI can read/write/search the vault.
+ * Schemas are standard JSON Schema (not DSH author DSL) since we register
+ * raw ToolDefinition objects without defineTool().
  */
 
 import type { MemoryConfig } from './tools/fs.ts'
@@ -49,11 +51,14 @@ export function apply(ctx: any, config: MemoryConfig): void {
     name: 'obsidian_memory_read',
     description: 'Read a Markdown or text file from the Obsidian memory vault.',
     parameters: {
-      file_path: {
-        type: 'string',
-        required: true,
-        description: 'Relative path inside the vault, e.g. "Codex/AGENTS.md"',
+      type: 'object',
+      properties: {
+        file_path: {
+          type: 'string',
+          description: 'Relative path inside the vault, e.g. "Codex/AGENTS.md"',
+        },
       },
+      required: ['file_path'],
     },
     output: {
       schema: { type: 'string' },
@@ -71,21 +76,22 @@ export function apply(ctx: any, config: MemoryConfig): void {
     name: 'obsidian_memory_list',
     description: 'List files and directories inside the Obsidian memory vault.',
     parameters: {
-      path: {
-        type: 'string',
-        description: 'Relative directory path inside the vault. Defaults to root.',
+      type: 'object',
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Relative directory path inside the vault. Defaults to root.',
+        },
       },
     },
     output: {
       schema: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           entries: {
             type: 'array',
             items: {
               type: 'object',
-              additionalProperties: false,
               properties: {
                 name: { type: 'string' },
                 type: { type: 'string' },
@@ -110,22 +116,23 @@ export function apply(ctx: any, config: MemoryConfig): void {
     name: 'obsidian_memory_search',
     description: 'Full-text search across Markdown files in the Obsidian memory vault.',
     parameters: {
-      query: {
-        type: 'string',
-        required: true,
-        description: 'Search term to look for in vault files.',
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Search term to look for in vault files.',
+        },
       },
+      required: ['query'],
     },
     output: {
       schema: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           results: {
             type: 'array',
             items: {
               type: 'object',
-              additionalProperties: false,
               properties: {
                 path: { type: 'string' },
                 matches: { type: 'integer' },
@@ -154,21 +161,22 @@ export function apply(ctx: any, config: MemoryConfig): void {
     name: 'obsidian_memory_write',
     description: 'Write or overwrite a file in the Obsidian memory vault.',
     parameters: {
-      file_path: {
-        type: 'string',
-        required: true,
-        description: 'Relative path inside the vault, e.g. "Codex/notes/idea.md"',
+      type: 'object',
+      properties: {
+        file_path: {
+          type: 'string',
+          description: 'Relative path inside the vault, e.g. "Codex/notes/idea.md"',
+        },
+        content: {
+          type: 'string',
+          description: 'Full content to write.',
+        },
       },
-      content: {
-        type: 'string',
-        required: true,
-        description: 'Full content to write.',
-      },
+      required: ['file_path', 'content'],
     },
     output: {
       schema: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           success: { type: 'boolean' },
           path: { type: 'string' },
@@ -194,21 +202,22 @@ export function apply(ctx: any, config: MemoryConfig): void {
     name: 'obsidian_memory_append',
     description: 'Append content to the end of a file in the Obsidian memory vault.',
     parameters: {
-      file_path: {
-        type: 'string',
-        required: true,
-        description: 'Relative path inside the vault.',
+      type: 'object',
+      properties: {
+        file_path: {
+          type: 'string',
+          description: 'Relative path inside the vault.',
+        },
+        content: {
+          type: 'string',
+          description: 'Content to append. A newline is inserted automatically.',
+        },
       },
-      content: {
-        type: 'string',
-        required: true,
-        description: 'Content to append. A newline is inserted automatically.',
-      },
+      required: ['file_path', 'content'],
     },
     output: {
       schema: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           success: { type: 'boolean' },
           path: { type: 'string' },

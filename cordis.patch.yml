@@ -1,9 +1,7 @@
 # Cordis patch for dsh-client-ui-obsidian-memory
-# Registers the Obsidian Memory sidebar panel + memory tools into DSH.
-- insert:
-    - id: ui-obsidian-memory
-      name: dsh-client-ui-obsidian-memory
-      config:
-        # Path to your Obsidian vault. Adjust to your actual vault location.
-        # The AI will use this path for all obsidian_memory_* tool calls.
-        vaultPath: /Users/zdt/Documents/Obsidian Vault
+# Patches the existing ui-obsidian-memory row with vaultPath config.
+- id: ui-obsidian-memory
+  config:
+    # Path to your Obsidian vault. Adjust to your actual vault location.
+    # The AI will use this path for all obsidian_memory_* tool calls.
+    vaultPath: /Users/zdt/Documents/Obsidian Vault

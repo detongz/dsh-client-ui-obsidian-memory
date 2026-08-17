@@ -12,13 +12,9 @@ import {
   appendVaultFile,
 } from './tools/fs.ts'
 
-/** Plugin identifier used by Cordis loader diagnostics. */
 export const name = 'tool-obsidian-memory'
-
-/** Services required: tools registry + system prompt. */
 export const inject = ['tools', 'systemPrompt']
 
-/** Register the Obsidian Memory tool suite. */
 export function apply(ctx: any, config: MemoryConfig): void {
   const vaultPath = config.vaultPath || process.env.OBSIDIAN_VAULT_PATH
 
@@ -30,7 +26,6 @@ export function apply(ctx: any, config: MemoryConfig): void {
     return
   }
 
-  // Inject system prompt guidance so the model knows about the memory vault
   if (ctx.systemPrompt) {
     ctx.systemPrompt.section({
       name: 'tool:obsidian-memory',
@@ -49,7 +44,7 @@ export function apply(ctx: any, config: MemoryConfig): void {
     })
   }
 
-  // ── obsidian_memory_read ─────────────────────────────────────────────────
+  // obsidian_memory_read
   ctx.tools.register({
     name: 'obsidian_memory_read',
     description: 'Read a Markdown or text file from the Obsidian memory vault.',
@@ -71,7 +66,7 @@ export function apply(ctx: any, config: MemoryConfig): void {
     },
   })
 
-  // ── obsidian_memory_list ─────────────────────────────────────────────────
+  // obsidian_memory_list
   ctx.tools.register({
     name: 'obsidian_memory_list',
     description: 'List files and directories inside the Obsidian memory vault.',
@@ -88,13 +83,12 @@ export function apply(ctx: any, config: MemoryConfig): void {
         properties: {
           entries: {
             type: 'array',
-            required: true,
             items: {
               type: 'object',
               additionalProperties: false,
               properties: {
-                name: { type: 'string', required: true },
-                type: { type: 'string', required: true },
+                name: { type: 'string' },
+                type: { type: 'string' },
               },
             },
           },
@@ -111,7 +105,7 @@ export function apply(ctx: any, config: MemoryConfig): void {
     },
   })
 
-  // ── obsidian_memory_search ───────────────────────────────────────────────
+  // obsidian_memory_search
   ctx.tools.register({
     name: 'obsidian_memory_search',
     description: 'Full-text search across Markdown files in the Obsidian memory vault.',
@@ -129,14 +123,13 @@ export function apply(ctx: any, config: MemoryConfig): void {
         properties: {
           results: {
             type: 'array',
-            required: true,
             items: {
               type: 'object',
               additionalProperties: false,
               properties: {
-                path: { type: 'string', required: true },
-                matches: { type: 'integer', required: true },
-                snippet: { type: 'string', required: true },
+                path: { type: 'string' },
+                matches: { type: 'integer' },
+                snippet: { type: 'string' },
               },
             },
           },
@@ -156,7 +149,7 @@ export function apply(ctx: any, config: MemoryConfig): void {
     },
   })
 
-  // ── obsidian_memory_write ────────────────────────────────────────────────
+  // obsidian_memory_write
   ctx.tools.register({
     name: 'obsidian_memory_write',
     description: 'Write or overwrite a file in the Obsidian memory vault.',
@@ -177,8 +170,8 @@ export function apply(ctx: any, config: MemoryConfig): void {
         type: 'object',
         additionalProperties: false,
         properties: {
-          success: { type: 'boolean', required: true },
-          path: { type: 'string', required: true },
+          success: { type: 'boolean' },
+          path: { type: 'string' },
         },
       },
       render(_args: any, value: { success: boolean; path: string }) {
@@ -196,7 +189,7 @@ export function apply(ctx: any, config: MemoryConfig): void {
     },
   })
 
-  // ── obsidian_memory_append ───────────────────────────────────────────────
+  // obsidian_memory_append
   ctx.tools.register({
     name: 'obsidian_memory_append',
     description: 'Append content to the end of a file in the Obsidian memory vault.',
@@ -217,8 +210,8 @@ export function apply(ctx: any, config: MemoryConfig): void {
         type: 'object',
         additionalProperties: false,
         properties: {
-          success: { type: 'boolean', required: true },
-          path: { type: 'string', required: true },
+          success: { type: 'boolean' },
+          path: { type: 'string' },
         },
       },
       render(_args: any, value: { success: boolean; path: string }) {

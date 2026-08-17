@@ -1,6 +1,6 @@
 {
   "name": "dsh-client-ui-obsidian-memory",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Obsidian Memory plugin for DeepSeek Harness — persistent memory via local Markdown vault",
   "type": "module",
   "main": "lib/index.js",
@@ -14,6 +14,9 @@
     "./package.json": "./package.json"
   },
   "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "inject": [
         "@deepseek-ai/dsh-client-runtime",
@@ -24,11 +27,13 @@
   },
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
-    "watch": "rolldown -c rolldown.config.ts --watch"
+    "watch": "rolldown -c rolldown.config.ts --watch",
+    "prepare": "npm run build"
   },
   "files": [
     "lib/index.js",
     "lib/client.js",
+    "cordis.patch.yml",
     "README.md",
     "README.zh.md",
     "LICENSE"
@@ -48,10 +53,10 @@
     "url": "git+https://github.com/detongz/dsh-client-ui-obsidian-memory.git"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-client-locale": ">=0.2.4",
-    "@deepseek-ai/dsh-client-runtime": ">=0.2.4",
-    "@deepseek-ai/dsh-client-ui-sidebar": ">=0.2.4",
-    "@deepseek-ai/dsh-client-ui-slots": ">=0.2.4",
+    "@deepseek-ai/dsh-client-locale": ">=0.1.0-rc.5",
+    "@deepseek-ai/dsh-client-runtime": ">=0.1.0-rc.5",
+    "@deepseek-ai/dsh-client-ui-sidebar": ">=0.1.0-rc.5",
+    "@deepseek-ai/dsh-client-ui-slots": ">=0.1.0-rc.5",
     "react": "^18.2.0"
   },
   "peerDependenciesMeta": {

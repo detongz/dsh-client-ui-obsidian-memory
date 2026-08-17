@@ -6,6 +6,17 @@ import { basename } from 'node:path'
 const CSS_VIRTUAL_PREFIX = '\0dsh-css:'
 const CSS_VIRTUAL_SUFFIX = '.mjs'
 
+/**
+ * The plugin's package name — the module-table key the bundle must register
+ * under. The DSH client module loader keys factories by the loader entry's
+ * name (the `name:` in cordis.patch.yml, which resolves to this package),
+ * so the `__ModuleLoader__.load` id MUST equal package.json's `name`.
+ * Deriving it here keeps the two in lockstep.
+ */
+const PLUGIN_ID = JSON.parse(
+  await readFile(new URL('./package.json', import.meta.url), 'utf-8'),
+).name as string
+
 function cssModulesInline(id: string): Plugin {
   return {
     name: 'dsh-css-modules-inline',
@@ -71,12 +82,12 @@ export default defineConfig([
     output: {
       file: 'lib/client.js',
       format: 'cjs',
-      banner: 'window.__ModuleLoader__.load({ id: "@deepseek-ai/dsh-client-ui-obsidian-memory", factory: (require) => {',
+      banner: `window.__ModuleLoader__.load({ id: ${JSON.stringify(PLUGIN_ID)}, factory: (require) => {`,
       footer: 'return module.exports; } });',
       intro: 'var module = { exports: {} }; var exports = module.exports;',
       sourcemap: true,
     },
     external: CLIENT_EXTERNALS,
-    plugins: [cssModulesInline('@deepseek-ai/dsh-client-ui-obsidian-memory')],
+    plugins: [cssModulesInline(PLUGIN_ID)],
   },
 ])

@@ -48,28 +48,30 @@
 
 ### 2. 安装插件
 
+一条命令即可，在任意目录执行：
+
 ```bash
-cd ~/.dsh/profiles/web        # 或你的 DSH profile 目录
-npm install dsh-client-ui-obsidian-memory
+dsh plugin add dsh-client-ui-obsidian-memory        # npm 发布版（推荐）
+# 或直接从源码安装：
+dsh plugin add detongz/dsh-client-ui-obsidian-memory
 ```
 
-> 如果你从源码安装 DSH 且不使用 profile，请在 DSH 工作区根目录安装。
+> 插件自带 `dsh.bundle` 清单，`dsh plugin add` 会**同时**安装并激活插件
+> （内置的 `cordis.patch.yml` 会自动插入 `ui-obsidian-memory` 条目），
+> 无需手动编辑 `cordis.patch.yml`。
 
-### 3. 添加到 `cordis.patch.yml`
+### 3. 配置 vault 路径
 
-编辑你的 profile 的 `cordis.patch.yml`（或 `cordis.yml`）：
+让插件指向你的 `Codex/` 文件夹。在 profile 的 `cordis.patch.yml` 中：
 
 ```yaml
-- insert:
-    - id: ui-obsidian-memory
-      name: dsh-client-ui-obsidian-memory
-      config:
-        vaultPath: /Users/你的用户名/Documents/Obsidian Vault/Codex
+- id: ui-obsidian-memory
+  config:
+    vaultPath: /Users/你的用户名/Documents/Obsidian Vault/Codex
 ```
 
-将 `vaultPath` 替换为你的 `Codex/` 文件夹的**绝对路径**。
-
-> **注意：** 必须使用 `insert`（不能只用 `id` + `config`），否则 DSH 不会加载 host 端的工具插件。如果只写了 `id: ui-obsidian-memory` 和 `config`，侧边栏 UI 可能会显示，但工具不会注册。
+将 `vaultPath` 替换为你的 `Codex/` 文件夹的**绝对路径**，
+也可以改用环境变量 `OBSIDIAN_VAULT_PATH`。
 
 ### 4. 重启 DSH
 
@@ -137,9 +139,9 @@ export OBSIDIAN_VAULT_PATH=/Users/你的用户名/Documents/Obsidian Vault/Codex
 
 | 现象 | 原因 | 解决 |
 |------|------|------|
-| Settings → Plugins 里看不到插件 | `cordis.patch.yml` 缺少 `insert` | 添加 `insert` 块（见快速开始步骤 3） |
+| Settings → Plugins 里看不到插件 | `dsh plugin add` 装的是 0.3.2 之前的旧版（被当作普通依赖安装，从未激活） | 重装：`dsh plugin add dsh-client-ui-obsidian-memory@latest` |
 | AI 无法使用工具 | `vaultPath` 未配置 | 在 `cordis.patch.yml` 或环境变量中设置 `vaultPath` |
-| 侧边栏面板不显示 | DSH 版本缺少 `sidebar.obsidian-memory` 插槽 | 升级 DSH 到 ≥ 0.1.0-rc.5 |
+| 侧边栏面板不显示 | DSH 版本缺少 `sidebar.obsidian-memory` 插槽 | 升级 DSH 到 ≥ 0.1.0-rc.5（或带该插槽的构建） |
 | "Path traversal detected" 报错 | AI 试图访问 vault 外文件 | 所有路径都被沙盒限制在 `vaultPath` 内 |
 
 ---
@@ -148,7 +150,7 @@ export OBSIDIAN_VAULT_PATH=/Users/你的用户名/Documents/Obsidian Vault/Codex
 
 ```bash
 git clone https://github.com/detongz/dsh-client-ui-obsidian-memory.git
-cd dsh-client-ui-obsidian-memory/plugin
+cd dsh-client-ui-obsidian-memory
 npm install
 npm run build        # 输出 lib/index.js + lib/client.js
 npm run watch        # 开发模式自动重建

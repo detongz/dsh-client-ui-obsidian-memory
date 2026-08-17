@@ -48,28 +48,31 @@ Create a `Codex/` folder anywhere on your machine (e.g. inside an Obsidian vault
 
 ### 2. Install the plugin
 
+One command, from anywhere:
+
 ```bash
-cd ~/.dsh/profiles/web        # or your DSH profile directory
-npm install dsh-client-ui-obsidian-memory
+dsh plugin add dsh-client-ui-obsidian-memory        # npm release (recommended)
+# or install straight from source:
+dsh plugin add detongz/dsh-client-ui-obsidian-memory
 ```
 
-> If you installed DSH from source and don't use profiles, install into the DSH workspace root instead.
+> The plugin ships a `dsh.bundle` manifest, so `dsh plugin add` both installs
+> the package **and** activates it as a profile layer (the bundled
+> `cordis.patch.yml` inserts the `ui-obsidian-memory` entry). No manual
+> `cordis.patch.yml` edit is needed to load the plugin.
 
-### 3. Add to `cordis.patch.yml`
+### 3. Configure your vault path
 
-Edit your profile's `cordis.patch.yml` (or `cordis.yml`):
+Point the plugin at your `Codex/` folder. In your profile's `cordis.patch.yml`:
 
 ```yaml
-- insert:
-    - id: ui-obsidian-memory
-      name: dsh-client-ui-obsidian-memory
-      config:
-        vaultPath: /Users/YOURNAME/Documents/Obsidian Vault/Codex
+- id: ui-obsidian-memory
+  config:
+    vaultPath: /Users/YOURNAME/Documents/Obsidian Vault/Codex
 ```
 
 Replace `vaultPath` with the **absolute path** to your `Codex/` folder.
-
-> **Note:** `insert` (not just `id` + `config`) is required so DSH loads the host-side tool plugin. If you only add `id: ui-obsidian-memory` with `config`, the sidebar UI may load but the tools will not be registered.
+Alternatively set the environment variable `OBSIDIAN_VAULT_PATH`.
 
 ### 4. Restart DSH
 
@@ -137,9 +140,9 @@ If neither `vaultPath` in config nor the env var is set, the plugin logs a warni
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| Plugin not in Settings → Plugins | `insert` missing in `cordis.patch.yml` | Add the `insert` block (see Quick Start step 3) |
+| Plugin not in Settings → Plugins | `dsh plugin add` installed an older version (pre-0.3.2) as a plain dependency | Reinstall: `dsh plugin add dsh-client-ui-obsidian-memory@latest` |
 | Tools not available to AI | `vaultPath` not configured | Set `vaultPath` in `cordis.patch.yml` or env var |
-| Sidebar panel not visible | DSH version lacks `sidebar.obsidian-memory` slot | Upgrade DSH to ≥ 0.1.0-rc.5 |
+| Sidebar panel not visible | DSH version lacks `sidebar.obsidian-memory` slot | Upgrade DSH to ≥ 0.1.0-rc.5 (or a build that declares the slot) |
 | "Path traversal detected" error | AI tried to access files outside vault | All paths are sandboxed to `vaultPath` |
 
 ---
@@ -148,7 +151,7 @@ If neither `vaultPath` in config nor the env var is set, the plugin logs a warni
 
 ```bash
 git clone https://github.com/detongz/dsh-client-ui-obsidian-memory.git
-cd dsh-client-ui-obsidian-memory/plugin
+cd dsh-client-ui-obsidian-memory
 npm install
 npm run build        # outputs lib/index.js + lib/client.js
 npm run watch        # dev mode with auto-rebuild

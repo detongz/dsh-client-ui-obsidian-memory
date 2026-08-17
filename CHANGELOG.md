@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.3.2 (2026-08-17)
+
+### Fixed
+- **Restored `dsh.bundle` manifest + bundled `cordis.patch.yml`** — the plugin is
+  installable again via `dsh plugin add` (regressed in 0.3.0, which removed the
+  bundle patch; `dsh plugin add` then installed the package as a plain
+  dependency and never activated it).
+- **Fixed client loader id.** The client bundle stamped
+  `@deepseek-ai/dsh-client-ui-obsidian-memory` into `__ModuleLoader__.load`,
+  but the package name is `dsh-client-ui-obsidian-memory`; the DSH client
+  module loader keys factories by the loader entry's name, so a standalone
+  install failed to register the bundle ("bundle … loaded without
+  registering"). The build now derives the id from `package.json`'s `name`.
+- **Peer ranges corrected** to the harness's actual `0.1.0-rc.x` line
+  (`>=0.1.0-rc.5`), with an explicit prerelease branch per the awesome-list
+  peer-range guidance.
+- **Repo hygiene**: un-tracked `node_modules/` (was committed), committed the
+  built `lib/` artifacts so git-based installs are self-contained, added a
+  `prepare` script.
+
+### Docs
+- Install instructions now use `dsh plugin add` (one-command install).
+
 ## 0.3.0 (2026-08-17)
 
 ### Breaking Changes

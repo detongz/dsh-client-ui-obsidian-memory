@@ -1,0 +1,11 @@
+# dsh-client-ui-obsidian-memory — cordis loader patch.
+#
+# Applied automatically when the plugin is installed via `dsh plugin add`
+# (the `dsh.bundle.patch` field in package.json points here).
+#
+# `insert` (not just `id` + `config`) is required so DSH loads the host-side
+# tool plugin: without it the obsidian_memory_* tools are not registered,
+# even though the sidebar UI may load.
+- insert:
+    - id: ui-obsidian-memory
+      name: dsh-client-ui-obsidian-memory

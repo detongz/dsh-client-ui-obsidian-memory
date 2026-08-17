@@ -1,5 +1,5 @@
 /**
- * Obsidian Memory sidebar panel — shows Codex vault file tree.
+ * Obsidian Memory sidebar panel — shows vault status and tool info.
  */
 import { useEffect, useState } from 'react'
 import css from './ObsidianMemoryPanel.module.css'
@@ -12,10 +12,12 @@ interface FileEntry {
 
 export function ObsidianMemoryPanel() {
   const [files, setFiles] = useState<FileEntry[]>([])
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(['']))
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
 
   const load = async () => {
+    setLoading(true)
+    setError('')
     try {
       const res = await fetch('http://127.0.0.1:3456/api/tree')
       if (!res.ok) throw new Error('preview server not running')
@@ -23,65 +25,14 @@ export function ObsidianMemoryPanel() {
       setFiles(data.files || [])
       setError('')
     } catch (e) {
-      setError('Preview server offline (port 3456)')
-      // Fallback: show hard-coded structure
-      setFiles([
-        { name: 'AGENTS.md', path: 'AGENTS.md', type: 'file' },
-        { name: 'TODO.md', path: 'TODO.md', type: 'file' },
-        { name: 'agent', path: 'agent', type: 'dir' },
-        { name: 'notes', path: 'notes', type: 'dir' },
-        { name: 'people', path: 'people', type: 'dir' },
-        { name: 'projects', path: 'projects', type: 'dir' },
-      ])
+      setError('Preview server offline — showing static structure')
+      setFiles([])
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => { load() }, [])
-
-  const toggleDir = (path: string) => {
-    const next = new Set(expanded)
-    if (next.has(path)) next.delete(path)
-    else next.add(path)
-    setExpanded(next)
-  }
-
-  const renderTree = (parentPath: string, depth: number) => {
-    const children = files.filter(f => {
-      const idx = f.path.lastIndexOf('/')
-      const parent = idx === -1 ? '' : f.path.substring(0, idx)
-      return parent === parentPath
-    })
-
-    return (
-      <ul className={css.tree} style={{ paddingLeft: depth * 12 }}>
-        {children.map(child => (
-          <li key={child.path}>
-            {child.type === 'dir' ? (
-              <div
-                className={css.dir}
-                onClick={() => toggleDir(child.path)}
-              >
-                <span>{expanded.has(child.path) ? '📂' : '📁'}</span>
-                <span>{child.name}</span>
-              </div>
-            ) : (
-              <div
-                className={css.file}
-                onClick={() => {
-                  // @ts-ignore — dsh workspace API
-                  window.dshOpenFile?.(`Codex/${child.path}`)
-                }}
-              >
-                <span>📄</span>
-                <span>{child.name}</span>
-              </div>
-            )}
-            {child.type === 'dir' && expanded.has(child.path) && renderTree(child.path, depth + 1)}
-          </li>
-        ))}
-      </ul>
-    )
-  }
 
   return (
     <div className={css.panel}>
@@ -89,8 +40,36 @@ export function ObsidianMemoryPanel() {
         <span>🧠 Obsidian Memory</span>
         <button className={css.refresh} onClick={load}>↻</button>
       </div>
-      {error && <div className={css.error}>{error}</div>}
-      {renderTree('', 0)}
+
+      {loading && <div className={css.info}>Loading…</div>}
+
+      {error && (
+        <div>
+          <div className={css.error}>{error}</div>
+          <div className={css.info}>
+            <p><strong>Available tools:</strong></p>
+            <ul className={css.toolList}>
+              <li>obsidian_memory_read</li>
+              <li>obsidian_memory_list</li>
+              <li>obsidian_memory_search</li>
+              <li>obsidian_memory_write</li>
+              <li>obsidian_memory_append</li>
+            </ul>
+            <p>Configure vaultPath in cordis.patch.yml to enable file access.</p>
+          </div>
+        </div>
+      )}
+
+      {files.length > 0 && (
+        <ul className={css.tree}>
+          {files.map(f => (
+            <li key={f.path} className={f.type === 'dir' ? css.dir : css.file}>
+              <span>{f.type === 'dir' ? '📁' : '📄'}</span>
+              <span>{f.name}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

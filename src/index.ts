@@ -198,7 +198,7 @@ export function apply(ctx: any, config: MemoryConfig): void {
   })
 
   // obsidian_memory_append
-  ctx.tools.register({
+  const appendSchema = {
     name: 'obsidian_memory_append',
     description: 'Append content to the end of a file in the Obsidian memory vault.',
     parameters: {
@@ -236,7 +236,9 @@ export function apply(ctx: any, config: MemoryConfig): void {
       await appendVaultFile(vaultPath, args.file_path, '\n' + args.content)
       return { success: true, path: args.file_path }
     },
-  })
+  }
+  ctx.logger?.info?.(`[tool-obsidian-memory] Registering ${appendSchema.name} with params: ${JSON.stringify(appendSchema.parameters)}`)
+  ctx.tools.register(appendSchema)
 
   ctx.logger?.info?.(`[tool-obsidian-memory] Registered 5 tools for vault: ${vaultPath}`)
 }

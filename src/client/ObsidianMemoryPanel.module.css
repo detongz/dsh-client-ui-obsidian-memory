@@ -82,3 +82,26 @@
   border-radius: 4px;
   margin-bottom: 6px;
 }
+
+.info {
+  font-size: 12px;
+  color: var(--text-muted, #666);
+  line-height: 1.5;
+}
+
+.info p {
+  margin: 4px 0;
+}
+
+.toolList {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.toolList li {
+  padding: 2px 0;
+  font-family: monospace;
+  color: var(--text-normal, #333);
+}

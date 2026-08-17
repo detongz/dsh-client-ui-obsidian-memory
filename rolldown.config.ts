@@ -63,16 +63,28 @@ const CLIENT_EXTERNALS = [
   'react/jsx-runtime',
 ]
 
-export default defineConfig({
-  input: 'src/client/index.ts',
-  output: {
-    file: 'lib/client.js',
-    format: 'cjs',
-    banner: `window.__ModuleLoader__.load({ id: "dsh-obsidian-memory", factory: (require) => {`,
-    footer: 'return module.exports; } });',
-    intro: 'var module = { exports: {} }; var exports = module.exports;',
-    sourcemap: true,
+export default defineConfig([
+  // Host bundle
+  {
+    input: 'src/index.ts',
+    output: {
+      file: 'lib/index.js',
+      format: 'cjs',
+    },
+    external: [],
   },
-  external: CLIENT_EXTERNALS,
-  plugins: [cssModulesInline('dsh-obsidian-memory')],
-})
+  // Client bundle
+  {
+    input: 'src/client/index.ts',
+    output: {
+      file: 'lib/client.js',
+      format: 'cjs',
+      banner: `window.__ModuleLoader__.load({ id: "dsh-obsidian-memory", factory: (require) => {`,
+      footer: 'return module.exports; } });',
+      intro: 'var module = { exports: {} }; var exports = module.exports;',
+      sourcemap: true,
+    },
+    external: CLIENT_EXTERNALS,
+    plugins: [cssModulesInline('dsh-obsidian-memory')],
+  },
+])

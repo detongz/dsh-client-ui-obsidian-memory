@@ -1,6 +1,6 @@
 {
   "name": "dsh-client-ui-obsidian-memory",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Obsidian Memory sidebar panel for DeepSeek Harness — vault file tree browser for Codex memory",
   "type": "module",
   "main": "lib/index.js",
@@ -49,10 +49,10 @@
     "url": "git+https://github.com/detongz/dsh-client-ui-obsidian-memory.git"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-client-locale": ">=0.2.0",
-    "@deepseek-ai/dsh-client-runtime": ">=0.2.0",
-    "@deepseek-ai/dsh-client-ui-sidebar": ">=0.2.0",
-    "@deepseek-ai/dsh-client-ui-slots": ">=0.2.0",
+    "@deepseek-ai/dsh-client-locale": ">=0.2.1",
+    "@deepseek-ai/dsh-client-runtime": ">=0.2.1",
+    "@deepseek-ai/dsh-client-ui-sidebar": ">=0.2.1",
+    "@deepseek-ai/dsh-client-ui-slots": ">=0.2.1",
     "react": "^18.2.0"
   },
   "peerDependenciesMeta": {

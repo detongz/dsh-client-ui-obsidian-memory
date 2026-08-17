@@ -1,7 +1,7 @@
 /**
  * Obsidian Memory panel plugin, browser half.
  * Registers the `sidebar.obsidian-memory` slot occupant that renders
- * the Codex vault file tree in the sidebar column.
+ * a vault directory browser in the sidebar column.
  */
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: pulls the sidebar slot declarations into this program.
@@ -24,7 +24,18 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 const NS = 'obsidian-memory'
 
 /** Required services (cordis fiber inject). */
-export const inject = ['slots', 'locale']
+export const inject = ['slots', 'workspaces', 'locale']
+
+/**
+ * Factory that creates the props injected into the sidebar occupant.
+ * Captures workspaces and config from the cordis context closure.
+ */
+function injected(ctx: ClientContext) {
+  return {
+    workspaces: ctx.workspaces,
+    config: (ctx as any).config as { vaultPath?: string } | undefined,
+  }
+}
 
 /**
  * Register the Obsidian Memory panel into the sidebar-owned slot.
@@ -36,5 +47,6 @@ export function apply(ctx: ClientContext): void {
   ctx.slots.inject('sidebar.obsidian-memory', () => ctx.slots.register({
     name: 'sidebar.obsidian-memory',
     locale: NS,
+    inject: () => injected(ctx),
   }, ObsidianMemoryPanel))
 }

@@ -1,6 +1,8 @@
 .panel {
   padding: 8px 12px;
   border-top: 1px solid var(--border-color, #e0e0e0);
+  font-size: 13px;
+  color: var(--text-normal, #333);
 }
 
 .header {
@@ -10,98 +12,68 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted, #666);
-  margin-bottom: 6px;
+  margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
-.refresh {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px 4px;
-  border-radius: 4px;
+.section {
+  margin-bottom: 12px;
 }
 
-.refresh:hover {
-  background: var(--background-modifier-hover, #eee);
-}
-
-.tree {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 13px;
-}
-
-.tree ul {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-}
-
-.tree li {
-  margin: 2px 0;
-}
-
-.file {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 6px;
-  border-radius: 4px;
-  cursor: pointer;
-  color: var(--text-normal, #333);
-}
-
-.file:hover {
-  background: var(--background-modifier-hover, #eee);
-}
-
-.dir {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 6px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  color: var(--text-normal, #333);
-}
-
-.dir:hover {
-  background: var(--background-modifier-hover, #eee);
-}
-
-.error {
+.sectionTitle {
   font-size: 11px;
-  color: #dc2626;
-  padding: 4px;
-  background: #fef2f2;
-  border-radius: 4px;
-  margin-bottom: 6px;
-}
-
-.info {
-  font-size: 12px;
+  font-weight: 600;
   color: var(--text-muted, #666);
-  line-height: 1.5;
-}
-
-.info p {
-  margin: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
 }
 
 .toolList {
   list-style: none;
   padding: 0;
-  margin: 4px 0;
+  margin: 0;
   font-size: 12px;
 }
 
 .toolList li {
   padding: 2px 0;
-  font-family: monospace;
   color: var(--text-normal, #333);
+}
+
+.toolList code {
+  font-family: monospace;
+  font-size: 11px;
+  background: var(--background-modifier-form-field, #f5f5f5);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.codeBlock {
+  font-family: monospace;
+  font-size: 11px;
+  background: var(--background-modifier-form-field, #f5f5f5);
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: 0;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+.tipList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+}
+
+.tipList li {
+  padding: 2px 0;
+  color: var(--text-normal, #333);
+}
+
+.tipList li::before {
+  content: '• ';
+  color: var(--text-muted, #666);
 }

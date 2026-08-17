@@ -1,8 +1,8 @@
 # dsh-client-ui-obsidian-memory
 
-> 🧠 DeepSeek Harness 的 Obsidian Memory 侧边栏插件
+> 🧠 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness/) 的 Obsidian Memory 插件 — 基于本地 Markdown 的持久记忆
 
-一个 DSH 客户端插件，在左侧边栏渲染 Obsidian Codex 知识库的文件树浏览器，通过本地预览服务器读取你的 vault。
+一个 DSH 插件，让你的 AI 助手拥有**持久记忆**，记忆内容存储在本地 Obsidian（或普通 Markdown）知识库中。插件注册 5 个文件系统工具（`obsidian_memory_*`），并在侧边栏显示 vault 状态和工具说明。
 
 灵感来自 [@Saccc_c](https://x.com/Saccc_c) 的 Codex 记忆技巧。
 
@@ -12,83 +12,124 @@
 
 ## 功能
 
-- **侧边栏面板** — 在 DSH 左侧边栏的 `sidebar.obsidian-memory` 插槽中渲染
-- **实时文件树** — 从本地预览服务器（默认端口 `3456`）拉取 vault 文件树
-- **点击浏览** — 展开/收起文件夹，查看 markdown 文件
-- **离线兜底** — 预览服务器未启动时，显示硬编码的 vault 骨架结构
+- **5 个记忆工具** — AI 可以读取、列出、搜索、写入、追加本地 vault 文件
+- **侧边栏面板** — 在 DSH 左侧边栏 `sidebar.obsidian-memory` 插槽中显示工具说明
+- **无需外部服务器** — 直接通过 DSH 的 host 运行时读写文件系统
+- **兼容 Codex 结构** — 支持社区推荐的 `Codex/` 目录结构
+
+### 可用工具
+
+| 工具 | 功能 |
+|------|------|
+| `obsidian_memory_read` | 读取 Markdown 或文本文件 |
+| `obsidian_memory_list` | 列出文件和目录 |
+| `obsidian_memory_search` | 全文搜索 `.md` 和 `.txt` 文件 |
+| `obsidian_memory_write` | 写入或覆盖文件 |
+| `obsidian_memory_append` | 追加内容到文件末尾 |
 
 ---
 
 ## 快速开始
 
-### 1. 安装插件
+### 1. 准备 vault
 
-```bash
-cd /path/to/deepseek-harness
-npm install dsh-client-ui-obsidian-memory
-# 或
-pnpm add dsh-client-ui-obsidian-memory
+在你的机器上创建一个 `Codex/` 文件夹（例如放在 Obsidian vault 里）：
+
+```
+~/Documents/Obsidian Vault/
+└── Codex/
+    ├── AGENTS.md      ← AI 操作说明书
+    ├── TODO.md        ← 待办事项 / 未收尾的工作
+    ├── people/
+    ├── projects/
+    ├── notes/
+    └── daily/
 ```
 
-在 `cordis.patch.yml`（或 `cordis.yml`）中添加：
+### 2. 安装插件
+
+```bash
+cd ~/.dsh/profiles/web        # 或你的 DSH profile 目录
+npm install dsh-client-ui-obsidian-memory
+```
+
+> 如果你从源码安装 DSH 且不使用 profile，请在 DSH 工作区根目录安装。
+
+### 3. 添加到 `cordis.patch.yml`
+
+编辑你的 profile 的 `cordis.patch.yml`（或 `cordis.yml`）：
 
 ```yaml
-- id: ui-obsidian-memory
-  name: dsh-client-ui-obsidian-memory
+- insert:
+    - id: ui-obsidian-memory
+      name: dsh-client-ui-obsidian-memory
+      config:
+        vaultPath: /Users/你的用户名/Documents/Obsidian Vault/Codex
 ```
 
-> **前置条件**：`ui-sidebar` 必须声明 `sidebar.obsidian-memory` 子插槽。DSH ≥ 0.1.0-rc.5 已包含。如果你的版本尚未支持，见下方「手动补丁」节。
+将 `vaultPath` 替换为你的 `Codex/` 文件夹的**绝对路径**。
 
-然后重新构建并重启：
+> **注意：** 必须使用 `insert`（不能只用 `id` + `config`），否则 DSH 不会加载 host 端的工具插件。如果只写了 `id: ui-obsidian-memory` 和 `config`，侧边栏 UI 可能会显示，但工具不会注册。
+
+### 4. 重启 DSH
 
 ```bash
-npm run build:web
-dsh web
+dsh web   # 或你平时启动 DSH 的方式
 ```
 
-### 2. 启动预览服务器
+重启后：
+- **侧边栏面板** 会出现在左侧（🧠 Obsidian Memory）
+- **5 个工具** 在配置了 `vaultPath` 后可供 AI 使用
 
-预览服务器读取本地 vault 并通过 HTTP 暴露。
+---
 
+## 配置
+
+| 选项 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `vaultPath` | `string` | — | Codex/ vault 目录的绝对路径 |
+
+环境变量兜底（可选）：
 ```bash
-cd dsh-obsidian-memory/mcp-server
-npm install && npm run build
-node dist/preview-server.js --vault /path/to/your/Obsidian/Codex
+export OBSIDIAN_VAULT_PATH=/Users/你的用户名/Documents/Obsidian Vault/Codex
 ```
 
-默认端口 `3456`。面板会在页面加载时自动连接。
+如果配置和 env var 都没有设置，插件会记录警告并跳过工具注册。
 
 ---
 
 ## 架构
 
 ```
-┌─────────────────────────────┐
-│ DSH Web (端口 3080)         │
-│  ┌───────────────────────┐  │
-│  │ sidebar.obsidian-memory│  │
-│  │  ┌─────────────────┐  │  │
-│  │  │ 🧠 Obsidian     │  │  │
-│  │  │    Memory 面板  │  │  │
-│  │  └─────────────────┘  │  │
-│  └───────────────────────┘  │
-└──────────┬──────────────────┘
-           │ fetch /api/tree
-┌──────────▼──────────────────┐
-│ Preview Server (端口 3456)  │
-│ (本仓库的 mcp-server/)      │
-└──────────┬──────────────────┘
-           │ 读取文件系统
-┌──────────▼──────────────────┐
-│ Obsidian Vault / Codex/     │
-└─────────────────────────────┘
+┌─────────────────────────────────────────┐
+│ DSH Web（浏览器端）                      │
+│  ┌─────────────────────────────────┐    │
+│  │ sidebar.obsidian-memory          │    │
+│  │  ┌─────────────────────────┐    │    │
+│  │  │ 🧠 Obsidian Memory      │    │    │
+│  │  │  — 工具说明              │    │    │
+│  │  │  — vault 结构            │    │    │
+│  │  └─────────────────────────┘    │    │
+│  └─────────────────────────────────┘    │
+└─────────────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────┐
+│ DSH Host（Node.js）                     │
+│  • 读写本地文件                         │
+│  • 注册 5 个 obsidian_memory_* 工具     │
+└─────────────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────┐
+│ 本地文件系统                            │
+│  ~/Documents/Obsidian Vault/Codex/      │
+└─────────────────────────────────────────┘
 ```
 
 | 组件 | 职责 |
 |------|------|
-| **DSH 插件** (`dsh-client-ui-obsidian-memory`) | 浏览器端：侧边栏面板、文件树渲染 |
-| **预览服务器** (`mcp-server/`) | Node 端：读取本地 vault，提供 `/api/tree` HTTP API |
-| **Obsidian Vault** | 数据源：Markdown 文件 + 文件夹 |
+| **Host** (`lib/index.js`) | Node 端：注册工具、读写 vault 文件 |
+| **Client** (`lib/client.js`) | 浏览器端：侧边栏面板，显示工具说明 |
+| **Vault** | 数据源：本地 Markdown 文件 |
 
 ---
 
@@ -96,65 +137,10 @@ node dist/preview-server.js --vault /path/to/your/Obsidian/Codex
 
 | 现象 | 原因 | 解决 |
 |------|------|------|
-| 面板显示 "Preview server offline (port 3456)" | 预览服务器未启动 | 运行 `node dist/preview-server.js --vault <路径>` |
-| 面板完全不出现 | 插槽未注册 | 确认 `cordis.patch.yml` 包含 `ui-obsidian-memory` 行 |
-| 文件树为空 | vault 路径错误或目录为空 | 检查 `--vault` 指向的是 `Codex/` 文件夹 |
-| 点击文件无反应 | `window.dshOpenFile` 未注入 | 已知限制，需 DSH 提供文件打开 API |
-
----
-
-## 手动补丁（如果你的 DSH 尚未支持该插槽）
-
-如果你的 DSH 版本还没有 `sidebar.obsidian-memory` 插槽声明，给 `ui-sidebar` 打以下补丁：
-
-**`packages/client/ui-sidebar/src/client/contract/slots.ts`**
-
-在 `SlotMap` 中添加：
-
-```ts
-'sidebar.obsidian-memory': { kind: 'single'; scope: 'root'; owner: ObsidianMemoryOwnerProps }
-```
-
-并添加接口：
-
-```ts
-export interface ObsidianMemoryOwnerProps {
-  wide: boolean
-}
-```
-
-**`packages/client/ui-sidebar/src/client/SidebarRoot.tsx`**
-
-在 `regionArea` div 之后插入：
-
-```tsx
-{wide && (
-  <div className={css.regionArea} style={{ flex: '0 0 auto', maxHeight: '280px', overflow: 'auto' }}>
-    {renderSlot('sidebar.obsidian-memory', { wide })}
-  </div>
-)}
-```
-
-然后重新构建 `ui-sidebar` 和 `web`。
-
----
-
-## 关联：Codex 记忆系统
-
-这个插件本身只负责**展示**你的 Obsidian vault。要让 AI 真正「记住」内容，你需要在 vault 中维护以下结构：
-
-```
-Codex/
-├── AGENTS.md          # AI 的操作说明书
-├── TODO.md            # 待跟进事项
-├── agent/
-│   └── open-loops.md  # 尚未收尾的工作
-├── notes/             # 随手笔记
-├── people/            # 关键人物信息
-└── projects/          # 项目状态
-```
-
-DSH 的 system prompt 或 agent preset 可以引用 `AGENTS.md`，告诉 AI 如何读写这个记忆库。
+| Settings → Plugins 里看不到插件 | `cordis.patch.yml` 缺少 `insert` | 添加 `insert` 块（见快速开始步骤 3） |
+| AI 无法使用工具 | `vaultPath` 未配置 | 在 `cordis.patch.yml` 或环境变量中设置 `vaultPath` |
+| 侧边栏面板不显示 | DSH 版本缺少 `sidebar.obsidian-memory` 插槽 | 升级 DSH 到 ≥ 0.1.0-rc.5 |
+| "Path traversal detected" 报错 | AI 试图访问 vault 外文件 | 所有路径都被沙盒限制在 `vaultPath` 内 |
 
 ---
 
@@ -164,12 +150,12 @@ DSH 的 system prompt 或 agent preset 可以引用 `AGENTS.md`，告诉 AI 如�
 git clone https://github.com/detongz/dsh-client-ui-obsidian-memory.git
 cd dsh-client-ui-obsidian-memory/plugin
 npm install
-npm run build        # 输出 lib/client.js
+npm run build        # 输出 lib/index.js + lib/client.js
 npm run watch        # 开发模式自动重建
 ```
 
 构建产物说明：
-- `lib/index.js` — host 入口（空实现，DSH 要求）
+- `lib/index.js` — host 入口（工具注册 + 文件读写）
 - `lib/client.js` — browser bundle（DSH closure-factory 格式，CSS 内联）
 
 ---

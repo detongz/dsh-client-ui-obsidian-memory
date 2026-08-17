@@ -1,8 +1,8 @@
 # dsh-client-ui-obsidian-memory
 
-> 🧠 Obsidian Memory sidebar panel for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness/)
+> 🧠 Obsidian Memory for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness/) — persistent memory via local Markdown vault
 
-A DSH client plugin that renders a file-tree browser inside the sidebar, connecting to a local preview server which exposes your Obsidian Codex vault over HTTP.
+A DSH plugin that gives your AI agent **persistent memory** backed by a local Obsidian (or plain Markdown) vault. It registers 5 file-system tools (`obsidian_memory_*`) and renders a sidebar panel showing vault status and tool reference.
 
 Inspired by [@Saccc_c](https://x.com/Saccc_c)'s Codex memory techniques.
 
@@ -12,84 +12,124 @@ Inspired by [@Saccc_c](https://x.com/Saccc_c)'s Codex memory techniques.
 
 ## What it does
 
+- **5 memory tools** — AI can read, list, search, write, and append to your local vault
 - **Sidebar panel** — renders inside the `sidebar.obsidian-memory` slot in DSH's left column
-- **Live vault tree** — fetches file tree from a local preview server (default port `3456`)
-- **Click to browse** — expand folders, view markdown files
-- **Fallback** — if the preview server is offline, shows a hard-coded skeleton of your vault structure
+- **No external server** — talks directly to the file system via DSH's host runtime
+- **Codex-compatible** — works with the `Codex/` directory structure recommended by the community
+
+### Available Tools
+
+| Tool | Action |
+|------|--------|
+| `obsidian_memory_read` | Read a Markdown or text file |
+| `obsidian_memory_list` | List files and directories |
+| `obsidian_memory_search` | Full-text search across `.md` and `.txt` files |
+| `obsidian_memory_write` | Write or overwrite a file |
+| `obsidian_memory_append` | Append content to the end of a file |
 
 ---
 
 ## Quick Start
 
-### 1. Install the plugin
+### 1. Prepare your vault
 
-```bash
-cd /path/to/deepseek-harness
-npm install dsh-client-ui-obsidian-memory
-# or
-pnpm add dsh-client-ui-obsidian-memory
+Create a `Codex/` folder anywhere on your machine (e.g. inside an Obsidian vault):
+
+```
+~/Documents/Obsidian Vault/
+└── Codex/
+    ├── AGENTS.md      ← AI operating instructions
+    ├── TODO.md        ← pending tasks / open loops
+    ├── people/
+    ├── projects/
+    ├── notes/
+    └── daily/
 ```
 
-Add to your DSH `cordis.patch.yml` (or `cordis.yml`):
+### 2. Install the plugin
+
+```bash
+cd ~/.dsh/profiles/web        # or your DSH profile directory
+npm install dsh-client-ui-obsidian-memory
+```
+
+> If you installed DSH from source and don't use profiles, install into the DSH workspace root instead.
+
+### 3. Add to `cordis.patch.yml`
+
+Edit your profile's `cordis.patch.yml` (or `cordis.yml`):
 
 ```yaml
-- id: ui-obsidian-memory
-  name: dsh-client-ui-obsidian-memory
+- insert:
+    - id: ui-obsidian-memory
+      name: dsh-client-ui-obsidian-memory
+      config:
+        vaultPath: /Users/YOURNAME/Documents/Obsidian Vault/Codex
 ```
 
-> **Prerequisite:** `ui-sidebar` must declare the `sidebar.obsidian-memory` child slot. This is available in DSH ≥ 0.1.0-rc.5. If your DSH version does not include it yet, see the **Manual Patch** section below.
+Replace `vaultPath` with the **absolute path** to your `Codex/` folder.
 
-Then rebuild and restart:
+> **Note:** `insert` (not just `id` + `config`) is required so DSH loads the host-side tool plugin. If you only add `id: ui-obsidian-memory` with `config`, the sidebar UI may load but the tools will not be registered.
+
+### 4. Restart DSH
 
 ```bash
-npm run build:web
-dsh web
+dsh web   # or however you launch DSH
 ```
 
-### 2. Start the preview server
+After restart:
+- The **sidebar panel** appears in the left column (🧠 Obsidian Memory)
+- The **5 tools** are available to the AI when `vaultPath` is configured
 
-The preview server reads your local vault and exposes it via HTTP.
+---
 
+## Configuration
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `vaultPath` | `string` | — | Absolute path to your Codex/ vault directory |
+
+Environment variable fallback (optional):
 ```bash
-# If you have the server from this repo
-cd dsh-obsidian-memory/mcp-server
-npm install && npm run build
-node dist/preview-server.js --vault /path/to/your/Obsidian/Codex
+export OBSIDIAN_VAULT_PATH=/Users/YOURNAME/Documents/Obsidian Vault/Codex
 ```
 
-Default port is `3456`. The panel will auto-connect on page load.
+If neither `vaultPath` in config nor the env var is set, the plugin logs a warning and skips tool registration.
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────┐
-│ DSH Web (port 3080)         │
-│  ┌───────────────────────┐  │
-│  │ sidebar.obsidian-memory│  │
-│  │  ┌─────────────────┐  │  │
-│  │  │ 🧠 Obsidian     │  │  │
-│  │  │    Memory Panel │  │  │
-│  │  └─────────────────┘  │  │
-│  └───────────────────────┘  │
-└──────────┬──────────────────┘
-           │ fetch /api/tree
-┌──────────▼──────────────────┐
-│ Preview Server (port 3456)  │
-│ (mcp-server in this repo)   │
-└──────────┬──────────────────┘
-           │ read FS
-┌──────────▼──────────────────┐
-│ Obsidian Vault / Codex/     │
-└─────────────────────────────┘
+┌─────────────────────────────────────────┐
+│ DSH Web (browser)                       │
+│  ┌─────────────────────────────────┐    │
+│  │ sidebar.obsidian-memory          │    │
+│  │  ┌─────────────────────────┐    │    │
+│  │  │ 🧠 Obsidian Memory      │    │    │
+│  │  │  — tool reference       │    │    │
+│  │  │  — vault structure      │    │    │
+│  │  └─────────────────────────┘    │    │
+│  └─────────────────────────────────┘    │
+└─────────────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────┐
+│ DSH Host (Node.js)                      │
+│  • reads / writes local files           │
+│  • registers 5 obsidian_memory_* tools  │
+└─────────────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────┐
+│ Local File System                       │
+│  ~/Documents/Obsidian Vault/Codex/      │
+└─────────────────────────────────────────┘
 ```
 
 | Component | Role |
 |-----------|------|
-| **DSH Plugin** (`dsh-client-ui-obsidian-memory`) | Browser side: sidebar panel, file tree rendering |
-| **Preview Server** (`mcp-server/`) | Node side: reads local vault, serves `/api/tree` HTTP API |
-| **Obsidian Vault** | Data source: Markdown files + folders |
+| **Host** (`lib/index.js`) | Node side: registers tools, reads/writes vault files |
+| **Client** (`lib/client.js`) | Browser side: sidebar panel with static tool reference |
+| **Vault** | Data source: local Markdown files |
 
 ---
 
@@ -97,46 +137,10 @@ Default port is `3456`. The panel will auto-connect on page load.
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| Panel shows "Preview server offline (port 3456)" | Preview server not running | Start it: `node dist/preview-server.js --vault <path>` |
-| Panel does not appear at all | Slot not registered | Verify `cordis.patch.yml` contains the `ui-obsidian-memory` row |
-| File tree is empty | Wrong vault path or empty dir | Check `--vault` points to the `Codex/` folder |
-| Clicking a file does nothing | `window.dshOpenFile` not injected | Known limitation — requires DSH workspace file-open API |
-
----
-
-## Manual Patch (if DSH does not yet have the slot)
-
-If your DSH version does not include the `sidebar.obsidian-memory` slot declaration in `ui-sidebar`, apply this patch:
-
-**`packages/client/ui-sidebar/src/client/contract/slots.ts`**
-
-Add to `SlotMap`:
-
-```ts
-'sidebar.obsidian-memory': { kind: 'single'; scope: 'root'; owner: ObsidianMemoryOwnerProps }
-```
-
-Add interface:
-
-```ts
-export interface ObsidianMemoryOwnerProps {
-  wide: boolean
-}
-```
-
-**`packages/client/ui-sidebar/src/client/SidebarRoot.tsx`**
-
-After the `regionArea` div, insert:
-
-```tsx
-{wide && (
-  <div className={css.regionArea} style={{ flex: '0 0 auto', maxHeight: '280px', overflow: 'auto' }}>
-    {renderSlot('sidebar.obsidian-memory', { wide })}
-  </div>
-)}
-```
-
-Then rebuild `ui-sidebar` and `web`.
+| Plugin not in Settings → Plugins | `insert` missing in `cordis.patch.yml` | Add the `insert` block (see Quick Start step 3) |
+| Tools not available to AI | `vaultPath` not configured | Set `vaultPath` in `cordis.patch.yml` or env var |
+| Sidebar panel not visible | DSH version lacks `sidebar.obsidian-memory` slot | Upgrade DSH to ≥ 0.1.0-rc.5 |
+| "Path traversal detected" error | AI tried to access files outside vault | All paths are sandboxed to `vaultPath` |
 
 ---
 
@@ -146,12 +150,12 @@ Then rebuild `ui-sidebar` and `web`.
 git clone https://github.com/detongz/dsh-client-ui-obsidian-memory.git
 cd dsh-client-ui-obsidian-memory/plugin
 npm install
-npm run build        # outputs lib/client.js
+npm run build        # outputs lib/index.js + lib/client.js
 npm run watch        # dev mode with auto-rebuild
 ```
 
 Build artifacts:
-- `lib/index.js` — host entry (noop, required by DSH)
+- `lib/index.js` — host entry (tool registration + file I/O)
 - `lib/client.js` — browser bundle (DSH closure-factory format, CSS inlined)
 
 ---

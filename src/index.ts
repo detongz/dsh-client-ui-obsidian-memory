@@ -1,8 +1,6 @@
 /**
  * Host-side tool plugin for Obsidian Memory.
  * Registers obsidian_memory_* tools so AI can read/write/search the vault.
- * Schemas are standard JSON Schema (not DSH author DSL) since we register
- * raw ToolDefinition objects without defineTool().
  */
 
 import type { MemoryConfig } from './tools/fs.ts'
@@ -14,7 +12,7 @@ import {
   appendVaultFile,
 } from './tools/fs.ts'
 
-export const name = 'tool-obsidian-memory'
+export const name = 'ui-obsidian-memory'
 export const inject = ['tools', 'systemPrompt']
 
 export function apply(ctx: any, config: MemoryConfig): void {
@@ -22,8 +20,8 @@ export function apply(ctx: any, config: MemoryConfig): void {
 
   if (!vaultPath) {
     ctx.logger?.warn?.(
-      '[tool-obsidian-memory] No vaultPath configured. ' +
-        'Set vaultPath in cordis.patch.yml or OBSIDIAN_VAULT_PATH env var.',
+      '[ui-obsidian-memory] No vaultPath configured. ' +
+        'Set vaultPath in cordis.patch.yml to enable file access.',
     )
     return
   }
@@ -45,6 +43,11 @@ export function apply(ctx: any, config: MemoryConfig): void {
         `When updating memory, be concise and structured. Do not dump raw chat history.`,
     })
   }
+
+  const okRender = (value: { success: boolean; path: string }) => ({
+    type: 'text' as const,
+    text: value.success ? `✅ Wrote ${value.path}` : `❌ Failed to write ${value.path}`,
+  })
 
   // obsidian_memory_read
   ctx.tools.register({
@@ -96,9 +99,11 @@ export function apply(ctx: any, config: MemoryConfig): void {
                 name: { type: 'string' },
                 type: { type: 'string' },
               },
+              required: ['name', 'type'],
             },
           },
         },
+        required: ['entries'],
       },
       render(_args: any, value: { entries: Array<{ name: string; type: string }> }) {
         const lines = value.entries.map((e) => `${e.type === 'directory' ? '📁' : '📄'} ${e.name}`)
@@ -138,9 +143,11 @@ export function apply(ctx: any, config: MemoryConfig): void {
                 matches: { type: 'integer' },
                 snippet: { type: 'string' },
               },
+              required: ['path', 'matches', 'snippet'],
             },
           },
         },
+        required: ['results'],
       },
       render(_args: any, value: { results: Array<{ path: string; matches: number; snippet: string }> }) {
         if (value.results.length === 0) {
@@ -181,14 +188,10 @@ export function apply(ctx: any, config: MemoryConfig): void {
           success: { type: 'boolean' },
           path: { type: 'string' },
         },
+        required: ['success', 'path'],
       },
       render(_args: any, value: { success: boolean; path: string }) {
-        return [
-          {
-            type: 'text',
-            text: value.success ? `✅ Wrote ${value.path}` : `❌ Failed to write ${value.path}`,
-          },
-        ]
+        return [okRender(value)]
       },
     },
     async execute(args: any) {
@@ -198,7 +201,7 @@ export function apply(ctx: any, config: MemoryConfig): void {
   })
 
   // obsidian_memory_append
-  const appendSchema = {
+  ctx.tools.register({
     name: 'obsidian_memory_append',
     description: 'Append content to the end of a file in the Obsidian memory vault.',
     parameters: {
@@ -222,23 +225,20 @@ export function apply(ctx: any, config: MemoryConfig): void {
           success: { type: 'boolean' },
           path: { type: 'string' },
         },
+        required: ['success', 'path'],
       },
       render(_args: any, value: { success: boolean; path: string }) {
-        return [
-          {
-            type: 'text',
-            text: value.success ? `✅ Appended to ${value.path}` : `❌ Failed to append to ${value.path}`,
-          },
-        ]
+        return [{
+          type: 'text' as const,
+          text: value.success ? `✅ Appended to ${value.path}` : `❌ Failed to append to ${value.path}`,
+        }]
       },
     },
     async execute(args: any) {
       await appendVaultFile(vaultPath, args.file_path, '\n' + args.content)
       return { success: true, path: args.file_path }
     },
-  }
-  ctx.logger?.info?.(`[tool-obsidian-memory] Registering ${appendSchema.name} with params: ${JSON.stringify(appendSchema.parameters)}`)
-  ctx.tools.register(appendSchema)
+  })
 
-  ctx.logger?.info?.(`[tool-obsidian-memory] Registered 5 tools for vault: ${vaultPath}`)
+  ctx.logger?.info?.(`[ui-obsidian-memory] Registered 5 tools for vault: ${vaultPath}`)
 }

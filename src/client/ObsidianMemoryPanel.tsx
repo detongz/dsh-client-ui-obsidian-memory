@@ -1,75 +1,48 @@
 /**
- * Obsidian Memory sidebar panel — shows vault status and tool info.
+ * Obsidian Memory sidebar panel — static info, no external server.
  */
-import { useEffect, useState } from 'react'
 import css from './ObsidianMemoryPanel.module.css'
 
-interface FileEntry {
-  name: string
-  path: string
-  type: 'file' | 'dir'
-}
-
 export function ObsidianMemoryPanel() {
-  const [files, setFiles] = useState<FileEntry[]>([])
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  const load = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const res = await fetch('http://127.0.0.1:3456/api/tree')
-      if (!res.ok) throw new Error('preview server not running')
-      const data = await res.json()
-      setFiles(data.files || [])
-      setError('')
-    } catch (e) {
-      setError('Preview server offline — showing static structure')
-      setFiles([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => { load() }, [])
-
   return (
     <div className={css.panel}>
       <div className={css.header}>
         <span>🧠 Obsidian Memory</span>
-        <button className={css.refresh} onClick={load}>↻</button>
       </div>
 
-      {loading && <div className={css.info}>Loading…</div>}
-
-      {error && (
-        <div>
-          <div className={css.error}>{error}</div>
-          <div className={css.info}>
-            <p><strong>Available tools:</strong></p>
-            <ul className={css.toolList}>
-              <li>obsidian_memory_read</li>
-              <li>obsidian_memory_list</li>
-              <li>obsidian_memory_search</li>
-              <li>obsidian_memory_write</li>
-              <li>obsidian_memory_append</li>
-            </ul>
-            <p>Configure vaultPath in cordis.patch.yml to enable file access.</p>
-          </div>
-        </div>
-      )}
-
-      {files.length > 0 && (
-        <ul className={css.tree}>
-          {files.map(f => (
-            <li key={f.path} className={f.type === 'dir' ? css.dir : css.file}>
-              <span>{f.type === 'dir' ? '📁' : '📄'}</span>
-              <span>{f.name}</span>
-            </li>
-          ))}
+      <div className={css.section}>
+        <div className={css.sectionTitle}>Available Tools</div>
+        <ul className={css.toolList}>
+          <li><code>obsidian_memory_read</code> — read a file</li>
+          <li><code>obsidian_memory_list</code> — list directory</li>
+          <li><code>obsidian_memory_search</code> — full-text search</li>
+          <li><code>obsidian_memory_write</code> — write/overwrite</li>
+          <li><code>obsidian_memory_append</code> — append to file</li>
         </ul>
-      )}
+      </div>
+
+      <div className={css.section}>
+        <div className={css.sectionTitle}>Vault Structure</div>
+        <pre className={css.codeBlock}>
+{`Codex/
+├── AGENTS.md
+├── TODO.md
+├── people/
+├── projects/
+├── notes/
+└── daily/`}
+        </pre>
+      </div>
+
+      <div className={css.section}>
+        <div className={css.sectionTitle}>Usage Tips</div>
+        <ul className={css.tipList}>
+          <li>Ask AI to "read my AGENTS.md" to load context</li>
+          <li>Say "append to TODO" to track open loops</li>
+          <li>Use "search my notes for ..." to find content</li>
+          <li>AI will auto-summarize and save key decisions</li>
+        </ul>
+      </div>
     </div>
   )
 }

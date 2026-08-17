@@ -1,7 +1,7 @@
 {
   "name": "dsh-client-ui-obsidian-memory",
-  "version": "0.2.5",
-  "description": "Obsidian Memory sidebar panel for DeepSeek Harness — vault file tree browser for Codex memory",
+  "version": "0.3.0",
+  "description": "Obsidian Memory plugin for DeepSeek Harness — persistent memory via local Markdown vault",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -14,9 +14,6 @@
     "./package.json": "./package.json"
   },
   "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
     "client": {
       "inject": [
         "@deepseek-ai/dsh-client-runtime",
@@ -33,6 +30,7 @@
     "lib/index.js",
     "lib/client.js",
     "README.md",
+    "README.zh.md",
     "LICENSE"
   ],
   "keywords": [
@@ -41,7 +39,8 @@
     "obsidian",
     "memory",
     "codex",
-    "plugin"
+    "plugin",
+    "dsh-plugin"
   ],
   "license": "MIT",
   "repository": {

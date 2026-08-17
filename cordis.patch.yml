@@ -1,7 +1,0 @@
-# Cordis patch for dsh-client-ui-obsidian-memory
-# Patches the existing ui-obsidian-memory row with vaultPath config.
-- id: ui-obsidian-memory
-  config:
-    # Path to your Obsidian vault. Adjust to your actual vault location.
-    # The AI will use this path for all obsidian_memory_* tool calls.
-    vaultPath: /Users/zdt/Documents/Obsidian Vault

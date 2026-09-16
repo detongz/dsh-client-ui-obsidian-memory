@@ -84,7 +84,7 @@ Both were discovered by running the harness, not assumed:
 | DSH version | Reason |
 |---|---|
 | `0.1.3-alpha.1` | No artifact for this version exists on the official npm registry (`npm view @deepseek-ai/dsh@0.1.3-alpha.1` fails; only `0.1.3-alpha.2` was published). It cannot be installed, so no honest verdict is possible. |
-| `0.1.3-alpha.2` | Its own CLI failed to install in the verification environment (a native `node-gyp` build error raised while installing `@deepseek-ai/dsh@0.1.3-alpha.2`, before this plugin was involved). Unknown for lack of a testable harness, not because of a known defect. |
+| `0.1.3-alpha.2` | Could not be brought up in the verification environment, for a reason unrelated to this plugin. A normal CLI install raised a native `node-gyp` build error; installing with `--ignore-scripts` then failed at boot with `MODULE_NOT_FOUND` for `@deepseek-ai/dsh-session-persistence-jsonl/node_modules/fs-ext/fs-ext.js` — `fs-ext` is a native module, and `--ignore-scripts` is exactly what skips building it. The plugin itself behaved in that same run (`scaffold`, `install` — package, `dsh.profile.bundles` and composed host entry — and `uninstall` all passed); only the profile's boot failed. So the failure is attributable to an incomplete DSH install, not to the plugin, and `incompatible` would be a false accusation. |
 
 Declaring `unknown` is deliberate: the store's rule is that an unreadable or
 untestable target is not evidence of incompatibility, and it must not be written
@@ -115,6 +115,9 @@ range to mirror.
   `web` profile was.
 - The harness asserts that the client half is *loaded and served*. It does not
   assert that the sidebar panel becomes visible — see the known issue below.
+- If the probe cannot read the tool registry at all, `host-execute` and
+  `sandbox` report `not exercised` rather than passing on an empty result, so a
+  broken boot can never be scored as a green run.
 
 ## Known issue: the sidebar panel does not render
 

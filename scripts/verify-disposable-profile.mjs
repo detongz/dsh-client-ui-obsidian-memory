@@ -73,13 +73,20 @@ const call = async (ctx, n, args) => {
 export function apply(ctx) {
   setTimeout(async () => {
     const report = { registered: [], missing: [], executions: {} }
-    for (const n of NAMES) (ctx.tools.get(n) === undefined ? report.missing : report.registered).push(n)
-    report.executions.listRoot = await call(ctx, 'obsidian_memory_list', {})
-    report.executions.write = await call(ctx, 'obsidian_memory_write', { file_path: 'notes/probe.md', content: 'probe-content-42' })
-    report.executions.read = await call(ctx, 'obsidian_memory_read', { file_path: 'notes/probe.md' })
-    report.executions.append = await call(ctx, 'obsidian_memory_append', { file_path: 'notes/probe.md', content: 'appended-line' })
-    report.executions.search = await call(ctx, 'obsidian_memory_search', { query: 'probe-content-42' })
-    report.executions.traversalBlocked = await call(ctx, 'obsidian_memory_read', { file_path: '../../../../etc/hosts' })
+    // Never let the probe throw into the host: if boot is already tearing down,
+    // ctx.tools is an inactive fiber and the throw would surface as a fatal
+    // load failure, masking whatever actually went wrong first.
+    try {
+      for (const n of NAMES) (ctx.tools.get(n) === undefined ? report.missing : report.registered).push(n)
+      report.executions.listRoot = await call(ctx, 'obsidian_memory_list', {})
+      report.executions.write = await call(ctx, 'obsidian_memory_write', { file_path: 'notes/probe.md', content: 'probe-content-42' })
+      report.executions.read = await call(ctx, 'obsidian_memory_read', { file_path: 'notes/probe.md' })
+      report.executions.append = await call(ctx, 'obsidian_memory_append', { file_path: 'notes/probe.md', content: 'appended-line' })
+      report.executions.search = await call(ctx, 'obsidian_memory_search', { query: 'probe-content-42' })
+      report.executions.traversalBlocked = await call(ctx, 'obsidian_memory_read', { file_path: '../../../../etc/hosts' })
+    } catch (e) {
+      report.probeError = String(e && e.message ? e.message : e)
+    }
     writeFileSync(process.env.PROBE_OUT, JSON.stringify(report, null, 2))
   }, 5000)
 }
@@ -233,20 +240,31 @@ if (session === null) {
 if (probe === null) {
   fail('host-tools', `probe produced no report | log: ${bootLog.slice(-400)}`)
 } else {
+  // A probe-level throw means the registry could not be read at all (usually a
+  // boot that failed before the plugin's fiber went active) — surface it
+  // verbatim rather than reporting "nothing registered".
+  const probeError = probe.probeError === undefined ? '' : ` | probe error: ${probe.probeError}`
   const missing = probe.missing ?? []
-  missing.length === 0
+  missing.length === 0 && probeError === ''
     ? pass('host-tools', `all ${TOOL_NAMES.length} tools registered`)
-    : fail('host-tools', `not registered: ${missing.join(', ')}`)
+    : fail('host-tools', `not registered: ${missing.join(', ') || '(registry unreadable)'}${probeError}`)
 
   const e = probe.executions ?? {}
-  const bad = Object.entries(e).filter(([k, v]) => k !== 'traversalBlocked' && v.ok !== true)
-  bad.length === 0
-    ? pass('host-execute', 'read/list/search/write/append all returned canonical values')
-    : fail('host-execute', `failed calls: ${bad.map(([k, v]) => `${k}: ${v.error}`).join('; ')}`)
+  if (probeError !== '') {
+    // No executions were recorded at all, so neither check has anything to
+    // judge. Saying "passed" here would be a false positive.
+    fail('host-execute', `not exercised: ${probeError}`)
+    fail('sandbox', `not exercised: ${probeError}`)
+  } else {
+    const bad = Object.entries(e).filter(([k, v]) => k !== 'traversalBlocked' && v.ok !== true)
+    bad.length === 0
+      ? pass('host-execute', 'read/list/search/write/append all returned canonical values')
+      : fail('host-execute', `failed calls: ${bad.map(([k, v]) => `${k}: ${v.error}`).join('; ')}`)
 
-  e.traversalBlocked?.ok === false && String(e.traversalBlocked.error).includes('traversal')
-    ? pass('sandbox', 'path traversal outside the vault is refused')
-    : fail('sandbox', 'path traversal was NOT refused')
+    e.traversalBlocked?.ok === false && String(e.traversalBlocked.error).includes('traversal')
+      ? pass('sandbox', 'path traversal outside the vault is refused')
+      : fail('sandbox', 'path traversal was NOT refused')
+  }
 }
 
 if (session !== null) {

@@ -1,5 +1,56 @@
 # Changelog
 
+## 0.4.0 (2026-09-16)
+
+### Added
+
+- **`dsh.compatibility.dshReleases` matrix.** Per-version compatibility is now
+  declared explicitly in `package.json` using exact full SemVer keys and the
+  values `compatible` / `incompatible` / `unknown`. Eight DSH releases are
+  declared `compatible` (`0.1.1-rc.2`, `0.1.2-alpha.5`, `0.1.2-rc.1`,
+  `0.1.5-alpha.1`, `0.1.5-alpha.2`, `0.1.5-rc.1`, `0.1.5-rc.2`,
+  `0.1.6-alpha.1`); `0.1.3-alpha.1` and `0.1.3-alpha.2` are declared `unknown`
+  because they could not be tested (no published artifact; a failing CLI
+  install). A range-only claim is not installable evidence, so nothing is
+  inferred from the peer ranges.
+- **`engines.node: ">=22"`**, the runtime exercised end to end. DSH itself does
+  not start on Node 18 (`node:util` has no `parseEnv`) or Node 20 (silent
+  exit), so no lower floor is claimed.
+- **`scripts/verify-disposable-profile.mjs`** — a disposable-`DSH_HOME`
+  acceptance harness that runs install → start → uninstall and asserts nine
+  checks: scaffold, install, start, host tool registration, host tool
+  execution, vault sandbox, client boot graph, client bundle, and uninstall. It
+  never touches a real profile. Exposed as `npm run verify:compat`.
+- **`docs/COMPATIBILITY.md`** — the evidence record: the verified matrix, what
+  each check asserts, the two version-dependent behaviours the harness absorbs,
+  the Node evidence, and the explicit limits of the claims.
+- README (EN + ZH) now document requirements, the verified DSH range, the
+  permissions and risk surface (file access, no network, `prepare` lifecycle
+  script), and the reproduction command.
+
+### Fixed
+
+- **The build is now byte-reproducible.** `lib/` previously depended on the
+  absolute path of the checkout, so the committed bundle could not be
+  reproduced from a different directory:
+  - rolldown's `//#region` comment embedded the CSS virtual module id
+    (`\0dsh-css:/Users/…/ObsidianMemoryPanel.module.css.mjs`);
+  - lightningcss mixed `filename` into its `[hash]` CSS-module prefix, so class
+    names changed with the path (`K_0wZG_panel` → `_1vBFta_panel` → …);
+  - its export order was not stable, which reordered the emitted class map.
+
+  The virtual id and the lightningcss `filename` are now project-root-relative,
+  and CSS-module exports are sorted. Verified identical sha256 across three
+  consecutive builds and two additional checkout paths.
+- **Corrected the README's sidebar claim.** The panel registers against
+  `sidebar.obsidian-memory`, which official `dsh-client-ui-sidebar` does not
+  declare — only `sidebar.brand.mark`, `sidebar.brand.name`,
+  `sidebar.panellist`, `sidebar.workspaces`, `sidebar.settings` and
+  `sidebar.footer.action`. The panel therefore does not render on any tested
+  version. Previously both READMEs stated it appears; they now disclose it as a
+  known issue and note the five tools are unaffected. Re-targeting the panel is
+  tracked separately as a panel-behaviour change.
+
 ## 0.3.2 (2026-08-17)
 
 ### Fixed

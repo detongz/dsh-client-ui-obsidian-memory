@@ -16,3 +16,9 @@ jobs:
           node-version: '22'
       - run: npm ci
       - run: npm run build
+      # The committed lib/ is what DSH STORE pins and what git-based installs
+      # ship, so a rebuild must reproduce it byte for byte. This fails the build
+      # if anything path-dependent or order-dependent creeps back into the
+      # bundling config (see docs/COMPATIBILITY.md).
+      - name: Verify committed lib/ matches a fresh build
+        run: git diff --exit-code --stat -- lib/

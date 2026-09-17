@@ -119,22 +119,26 @@ range to mirror.
   `sandbox` report `not exercised` rather than passing on an empty result, so a
   broken boot can never be scored as a green run.
 
-## Known issue: the sidebar panel does not render
+## Sidebar panel rendering (resolved in 0.4.1)
 
-The client half registers its panel against the slot `sidebar.obsidian-memory`
-(`src/client/index.ts`). Official `@deepseek-ai/dsh-client-ui-sidebar` declares
-only `sidebar.brand.mark`, `sidebar.brand.name`, `sidebar.panellist`,
-`sidebar.workspaces`, `sidebar.settings` and `sidebar.footer.action` — the
-`sidebar.obsidian-memory` slot is not among them on any tested version, so the
-occupant is never rendered and **no sidebar panel appears**.
+The client half now registers a global panel icon in the `sidebar.panellist`
+slot (`id: "obsidian-memory"`, `order: 50`, label "Obsidian Memory") and the
+vault browser in the layout's `main` slot under the same key
+(`src/client/index.ts`). Clicking the sidebar icon calls
+`ctx.layout.selectPanel("obsidian-memory")`, which opens the panel in the
+central column. This works on DSH versions that declare the `sidebar.panellist`
+list slot and the keyed `main` slot — verified on the `0.1.5` / `0.1.6` line,
+including the `0.1.6-alpha.1` run above (9/9 pass, client half loads with both
+registrations present).
 
-The five `obsidian_memory_*` tools are unaffected: they are registered by the
-host half and were verified working on every version in the matrix above.
+On DSH versions released before those slots existed, the two
+`ctx.slots.inject` calls are inert: the plugin still loads, the five
+`obsidian_memory_*` tools still work, and the sidebar icon simply does not
+appear. No crash, no install failure.
 
-A fix would mean re-targeting the panel at a slot the official shell does
-declare (most likely the `sidebar.panellist` list, which points at a main
-panel). That is a behavioural change to the panel, not a manifest fix, and is
-out of scope for this compatibility release.
+The five `obsidian_memory_*` tools are unaffected in every case: they are
+registered by the host half and were verified working on every version in the
+matrix above.
 
 ## Reproducing
 

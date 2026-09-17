@@ -13,7 +13,7 @@
 ## 功能
 
 - **5 个记忆工具** — AI 可以读取、列出、搜索、写入、追加本地 vault 文件
-- **侧边栏面板** — vault 目录浏览器，注册在 `sidebar.obsidian-memory` 插槽（⚠️ 当前 DSH 上不渲染）
+- **侧边栏面板** — vault 目录浏览器，从侧边栏面板图标打开；面板挂载在布局的 `main` 插槽（版本注意事项见[已知问题](#已知问题)）
 - **无需外部服务器** — 直接通过 DSH 的 host 运行时读写文件系统
 - **兼容 Codex 结构** — 支持社区推荐的 `Codex/` 目录结构
 
@@ -117,17 +117,20 @@ dsh web   # 或你平时启动 DSH 的方式
 
 ## 已知问题
 
-### 侧边栏面板不会渲染
+### 侧边栏面板现在会渲染了（自 0.4.1 起）
 
-客户端半体把面板注册在 `sidebar.obsidian-memory` 插槽上。而官方
-`@deepseek-ai/dsh-client-ui-sidebar` 只声明了 `sidebar.brand.mark`、
-`sidebar.brand.name`、`sidebar.panellist`、`sidebar.workspaces`、
-`sidebar.settings`、`sidebar.footer.action` —— 其中没有 `sidebar.obsidian-memory`，
-因此在本文验证过的所有 DSH 版本上面板都不会渲染。
+客户端半体在 `sidebar.panellist` 插槽注册一个全局面板图标
+（`id: "obsidian-memory"`、`order: 50`、标签 "Obsidian Memory"），并把 vault
+浏览器注册在布局的 `main` 插槽、使用同一个 key。点击侧边栏图标会调用
+`ctx.layout.selectPanel("obsidian-memory")`，在中央栏打开面板。该机制在声明了
+`sidebar.panellist` 列表插槽和 keyed `main` 插槽的 DSH 版本上可用
+（已在 `0.1.5` / `0.1.6` 系列验证）。
 
-**5 个 `obsidian_memory_*` 工具不受影响**，在上表所有版本上均正常工作。
-把面板改挂到官方 shell 确实声明的插槽（最可能是列表型的
-`sidebar.panellist`）属于面板行为变更，与兼容性分开处理。
+在那些插槽尚不存在的更早 DSH 版本上，两次 `ctx.slots.inject` 调用只是静默失效：
+插件照常加载、5 个 `obsidian_memory_*` 工具照常工作，只是侧边栏图标不出现。
+不崩溃、不影响安装——仅面板在旧版本上不可用。
+
+**5 个 `obsidian_memory_*` 工具在以上所有版本上均不受影响。**
 
 ### 构建可复现性（0.4.0 已修复）
 

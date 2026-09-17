@@ -1,6 +1,7 @@
 /**
- * Obsidian Memory slot contract — the canonical type for the
- * `sidebar.obsidian-memory` slot declared by ui-sidebar.
+ * Obsidian Memory slot contract — the canonical props for the main-panel
+ * occupant (the `main` slot, key `obsidian-memory`) opened from the sidebar
+ * panel icon.
  */
 
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'

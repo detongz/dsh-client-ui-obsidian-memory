@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.1 (2026-09-17)
+
+### Changed
+
+- **The sidebar panel now actually renders.** The client half previously
+  registered against a `sidebar.obsidian-memory` slot that the official
+  `dsh-client-ui-sidebar` never declared, so the panel never mounted. It now
+  registers a global panel icon in the `sidebar.panellist` slot
+  (`id: "obsidian-memory"`, `order: 50`, label "Obsidian Memory") and the vault
+  browser in the layout's `main` slot under the same key. Clicking the sidebar
+  icon calls `ctx.layout.selectPanel("obsidian-memory")` and opens the panel in
+  the central column.
+
+### Compatibility
+
+- On DSH versions released before the `sidebar.panellist` list slot and the
+  keyed `main` slot existed, both `ctx.slots.inject` calls are inert: the plugin
+  still loads, the five `obsidian_memory_*` tools still work, and only the
+  sidebar icon is absent. No crash, no install failure.
+- Verified on `0.1.6-alpha.1` (9/9 via `scripts/verify-disposable-profile.mjs`);
+  the `dsh.compatibility.dshReleases` matrix from 0.4.0 is unchanged.
+
 ## 0.4.0 (2026-09-16)
 
 ### Added
@@ -49,7 +71,7 @@
   `sidebar.footer.action`. The panel therefore does not render on any tested
   version. Previously both READMEs stated it appears; they now disclose it as a
   known issue and note the five tools are unaffected. Re-targeting the panel is
-  tracked separately as a panel-behaviour change.
+  tracked separately as a panel-behaviour change (shipped in 0.4.1).
 
 ## 0.3.2 (2026-08-17)
 

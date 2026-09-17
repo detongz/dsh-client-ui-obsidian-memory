@@ -35,17 +35,28 @@ const NS = 'obsidian-memory'
  */
 const PANEL_ID = 'obsidian-memory'
 
-/** Required services (cordis fiber inject). */
-export const inject = ['slots', 'workspaces', 'locale']
+/** Required services (cordis fiber inject).
+ *  NOTE: `config` is intentionally NOT injected. The client half runs in the
+ *  browser where cordis does not provide a `config` service (it exists only on
+ *  the host fiber), so injecting it leaves the entry "pending (waiting for
+ *  service: config)" and the plugin never activates. The vault path is instead
+ *  resolved on the client from localStorage / the directory picker, and (planned)
+ *  from a host-provided typert Remote. */
+export const inject = ['slots', 'uiWorkspace', 'locale']
 
 /**
  * Factory that creates the props injected into the main-panel occupant.
- * Captures workspaces and config from the cordis context closure.
+ * The directory browser service is `uiWorkspace` on the client (renamed from
+ * the older `workspaces` name). `listDirectory` / `pickDirectory` /
+ * `createDirectory` live there; `openPath` does not exist client-side, so the
+ * panel degrades file "open" to clipboard copy.
+ *
+ * The vault path is NOT read from `ctx.config` (unavailable on the client);
+ * the panel resolves it from localStorage / the directory picker instead.
  */
 function injected(ctx: ClientContext) {
   return {
-    workspaces: ctx.workspaces,
-    config: (ctx as any).config as { vaultPath?: string } | undefined,
+    workspaces: (ctx as any).uiWorkspace,
   }
 }
 

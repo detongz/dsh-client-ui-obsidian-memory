@@ -40,6 +40,17 @@
   margin-bottom: 6px;
 }
 
+.hint {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-muted, #666);
+  padding: 6px 8px;
+  background: var(--background-modifier-form-field, #f5f5f5);
+  border: 1px dashed var(--border-color, #e0e0e0);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
 .breadcrumb {
   font-size: 11px;
   color: var(--text-muted, #666);

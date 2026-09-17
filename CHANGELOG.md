@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.3 (2026-09-17)
+
+### Fixed
+
+- **Client entry uses the correct cordis service name and stops referencing the
+  unavailable `config` service.** `inject` now lists `uiWorkspace` (the real
+  client-side directory-browser service, previously misnamed `workspaces`), and
+  `config` is intentionally dropped — it exists only on the host fiber, so
+  injecting it left the entry `pending (waiting for service: config)` and the
+  plugin never activated. The vault path is resolved from `localStorage` /
+  the directory picker instead.
+
+### Changed
+
+- Added a `.hint` style (dashed callout) in `ObsidianMemoryPanel.module.css` for
+  surfacing the web-profile browse-capability note inside the panel.
+
 ## 0.4.2 (2026-09-17)
 
 ### Fixed

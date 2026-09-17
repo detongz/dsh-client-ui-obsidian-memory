@@ -1,6 +1,6 @@
 {
   "name": "dsh-client-ui-obsidian-memory",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Obsidian Memory plugin for DeepSeek Harness — persistent memory via local Markdown vault",
   "type": "module",
   "main": "lib/index.js",
@@ -28,6 +28,7 @@
       "platform": "web"
     },
     "compatibility": {
+      "range": ">=0.1.2-alpha.5",
       "dshReleases": {
         "0.1.1-rc.2": "compatible",
         "0.1.2-alpha.5": "compatible",

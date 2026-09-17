@@ -58,7 +58,7 @@ dsh plugin add detongz/dsh-client-ui-obsidian-memory
 
 > The plugin ships a `dsh.bundle` manifest, so `dsh plugin add` both installs
 > the package **and** activates it as a profile layer (the bundled
-> `cordis.patch.yml` inserts the `ui-obsidian-memory` entry). No manual
+> `cordis.patch.yml` inserts the `obsidian-memory` entry). No manual
 > `cordis.patch.yml` edit is needed to load the plugin.
 
 ### 3. Configure your vault path
@@ -66,7 +66,7 @@ dsh plugin add detongz/dsh-client-ui-obsidian-memory
 Point the plugin at your `Codex/` folder. In your profile's `cordis.patch.yml`:
 
 ```yaml
-- id: ui-obsidian-memory
+- id: obsidian-memory
   config:
     vaultPath: /Users/YOURNAME/Documents/Obsidian Vault/Codex
 ```

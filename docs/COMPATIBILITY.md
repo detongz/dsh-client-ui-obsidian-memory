@@ -28,6 +28,15 @@ Commit:
   an exact `compatible` record, so the map is kept current for the window that
   exists at release time.
 
+### Compatibility range (supplementary)
+
+`dsh.compatibility.range` carries a SemVer **range** (`>=0.1.2-alpha.5`) as the
+general DSH window this plugin targets. The store treats a range as
+*to-be-verified* — it is **not** installable evidence on its own. The exact
+per-version `dshReleases` map above is the authoritative installability record;
+the range merely states the intended floor. Node.js is declared via
+`engines.node` (`>=22`).
+
 ## Verified matrix
 
 Harness: `scripts/verify-disposable-profile.mjs`, Node **22.22.2**, pnpm
@@ -49,8 +58,8 @@ Harness: `scripts/verify-disposable-profile.mjs`, Node **22.22.2**, pnpm
 What "9/9 pass" means concretely, per version:
 
 - `install` — `dsh plugin add` wrote the package into the profile, appended it to
-  `dsh.profile.bundles`, and `dsh --dump-config` composed the `ui-obsidian-memory`
-  entry from the bundled `cordis.patch.yml`.
+  `dsh.profile.bundles`, and `dsh --dump-config` composed the `obsidian-memory`
+  entry from the bundled `cordis.patch.yml` (host entry id `obsidian-memory`).
 - `start` — the web profile served the index route.
 - `host-tools` / `host-execute` — a probe plugin mounted with `--patch` read the
   live tool registry and called all five tools; `read`, `list`, `search`, `write`

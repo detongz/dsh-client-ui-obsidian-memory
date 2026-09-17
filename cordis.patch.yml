@@ -7,5 +7,5 @@
 # tool plugin: without it the obsidian_memory_* tools are not registered,
 # even though the sidebar UI may load.
 - insert:
-    - id: ui-obsidian-memory
+    - id: obsidian-memory
       name: dsh-client-ui-obsidian-memory

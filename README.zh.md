@@ -57,7 +57,7 @@ dsh plugin add detongz/dsh-client-ui-obsidian-memory
 ```
 
 > 插件自带 `dsh.bundle` 清单，`dsh plugin add` 会**同时**安装并激活插件
-> （内置的 `cordis.patch.yml` 会自动插入 `ui-obsidian-memory` 条目），
+> （内置的 `cordis.patch.yml` 会自动插入 `obsidian-memory` 条目），
 > 无需手动编辑 `cordis.patch.yml`。
 
 ### 3. 配置 vault 路径
@@ -65,7 +65,7 @@ dsh plugin add detongz/dsh-client-ui-obsidian-memory
 让插件指向你的 `Codex/` 文件夹。在 profile 的 `cordis.patch.yml` 中：
 
 ```yaml
-- id: ui-obsidian-memory
+- id: obsidian-memory
   config:
     vaultPath: /Users/你的用户名/Documents/Obsidian Vault/Codex
 ```

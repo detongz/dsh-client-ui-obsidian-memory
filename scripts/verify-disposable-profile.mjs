@@ -38,7 +38,7 @@ import { delimiter, dirname, join, resolve } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 const PLUGIN_ID = 'dsh-client-ui-obsidian-memory'
-const ENTRY_ID = 'ui-obsidian-memory'
+const ENTRY_ID = 'obsidian-memory'
 const TOOL_NAMES = [
   'obsidian_memory_read',
   'obsidian_memory_list',

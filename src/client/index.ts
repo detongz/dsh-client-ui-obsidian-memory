@@ -65,7 +65,7 @@ function injected(ctx: ClientContext) {
  * @param ctx - client root context.
  */
 export function apply(ctx: ClientContext): void {
-  ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-obsidian-memory: dictionaries')
+  ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'obsidian-memory: dictionaries')
 
   // Sidebar panel icon — the row opens the main panel below when clicked.
   ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({

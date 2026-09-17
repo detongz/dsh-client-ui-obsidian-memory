@@ -12,7 +12,7 @@ import {
   appendVaultFile,
 } from './tools/fs.ts'
 
-export const name = 'ui-obsidian-memory'
+export const name = 'obsidian-memory'
 export const inject = ['tools', 'systemPrompt']
 
 export function apply(ctx: any, config: MemoryConfig): void {
@@ -20,7 +20,7 @@ export function apply(ctx: any, config: MemoryConfig): void {
 
   if (!vaultPath) {
     ctx.logger?.warn?.(
-      '[ui-obsidian-memory] No vaultPath configured. ' +
+      '[obsidian-memory] No vaultPath configured. ' +
         'Set vaultPath in cordis.patch.yml to enable file access.',
     )
     return
@@ -240,5 +240,5 @@ export function apply(ctx: any, config: MemoryConfig): void {
     },
   })
 
-  ctx.logger?.info?.(`[ui-obsidian-memory] Registered 5 tools for vault: ${vaultPath}`)
+  ctx.logger?.info?.(`[obsidian-memory] Registered 5 tools for vault: ${vaultPath}`)
 }

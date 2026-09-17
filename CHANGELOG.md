@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.4.4 (2026-09-17)
+
+### Fixed
+
+- **Stopped claiming the protected `ui-` entry-ID namespace.** The host cordis
+  entry id was `ui-obsidian-memory` (the `ui-` prefix is reserved for official
+  DSH UI components). It is now `obsidian-memory` in `src/index.ts`,
+  `cordis.patch.yml`, the client locale-effect key, the verify harness, and the
+  docs. The npm package name `dsh-client-ui-obsidian-memory` is unchanged —
+  package names with the `dsh-` prefix are permitted in DSH STORE.
+
+### Added
+
+- **Declared a DSH compatibility range.** `dsh.compatibility.range` is now
+  `>=0.1.2-alpha.5`, complementing the exact per-version `dshReleases` map. The
+  store treats a range as to-be-verified (not installable evidence on its own);
+  the exact `dshReleases` records remain the authoritative installability
+  source, satisfying DSH STORE's `DSH_LATEST_THREE_COMPATIBILITY_HOLD` check.
+
 ## 0.4.3 (2026-09-17)
 
 ### Fixed

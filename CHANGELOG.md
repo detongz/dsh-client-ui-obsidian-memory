@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.2 (2026-09-17)
+
+### Fixed
+
+- **Panel no longer crashes on mount in the web profile.** It previously called
+  `uiWorkspace.listDirectory()` with no path on mount, which surfaces DSH's
+  `directoryPicker.list needs the browse capability; the composed picker serves
+  "native"` error. The panel now only lists once a vault path is known, shows the
+  "Select Vault" prompt otherwise, and reports the browse-capability limitation
+  in plain copy instead of a raw error. `pickDirectory` failures are caught and
+  explained the same way.
+
+### Notes
+
+- The browser-side vault view is gated by DSH's `directoryPicker` `browse`
+  capability, which the **web profile** does not provide (it only serves
+  `native`). The host half reads/writes the vault directly via Node `fs`, so the
+  `obsidian_memory_*` tools work everywhere; only the in-browser tree is gated.
+  On a native / desktop DSH the panel shows the vault tree as intended. A
+  host→client typert Remote would lift the web-profile limit but needs the
+  `dsh-typert-generator` codegen tooling and would add a runtime dependency, so
+  it is intentionally not wired to protect the STORE compatibility restored in
+  0.4.0.
+
 ## 0.4.1 (2026-09-17)
 
 ### Changed

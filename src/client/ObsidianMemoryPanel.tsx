@@ -64,18 +64,26 @@ export function ObsidianMemoryPanel({ workspaces, config }: PanelProps) {
       setListing(result)
       if (path) setCurrentPath(path)
     } catch (e: any) {
-      setError(e?.rpcError?.message || e?.message || 'Failed to list directory')
+      const msg: string = e?.rpcError?.message || e?.message || ''
+      if (/browse capability|directoryPicker|waiting for service|not activated/i.test(msg)) {
+        setError(
+          'This DSH profile cannot browse the host filesystem. ' +
+          'Open the plugin in a native/desktop DSH (or a bridge that provides the browse capability) to view the vault.',
+        )
+      } else {
+        setError(msg || 'Failed to list directory')
+      }
     } finally {
       setLoading(false)
     }
   }, [workspaces])
 
+  // Only list when we already know a vault path. Calling listDirectory with no
+  // path hits the directory picker, which is capability-gated in the web profile
+  // and throws "needs the browse capability" — so we must not do it on mount.
   useEffect(() => {
     if (currentPath) {
       load(currentPath)
-    } else {
-      // Start at home directory
-      load()
     }
   }, [])
 
@@ -87,28 +95,48 @@ export function ObsidianMemoryPanel({ workspaces, config }: PanelProps) {
     if (listing && listing.crumbs.length > 1) {
       const parent = listing.crumbs[listing.crumbs.length - 2]
       load(parent.path)
-    } else {
-      load()
+    } else if (currentPath) {
+      load(currentPath)
     }
   }
 
   const pickVault = async () => {
-    const path = await workspaces.pickDirectory()
-    if (path) {
-      setSavedVaultPath(path)
-      setCurrentPath(path)
-      load(path)
+    try {
+      const path = await workspaces.pickDirectory()
+      if (path) {
+        setSavedVaultPath(path)
+        setCurrentPath(path)
+        load(path)
+      }
+    } catch (e: any) {
+      const msg: string = e?.rpcError?.message || e?.message || ''
+      setError(
+        /browse capability|directoryPicker|waiting for service|not activated/i.test(msg)
+          ? 'The directory picker is unavailable in this profile. Set vaultPath in the host config, or open in a native DSH.'
+          : (msg || 'Failed to open the directory picker'),
+      )
+    }
+  }
+
+  // There is no client-side `openPath`: opening a host path in the native
+  // file manager is a host capability. Degrade gracefully — if a future
+  // service exposes it, use it; otherwise copy the path to the clipboard so
+  // the operator still gets the location.
+  const openInHost = (absPath: string) => {
+    const w = workspaces as unknown as { openPath?: (p: string) => Promise<void> }
+    if (typeof w.openPath === 'function') {
+      w.openPath(absPath).catch(() => {})
+    } else {
+      navigator.clipboard?.writeText(absPath).catch(() => {})
     }
   }
 
   const openCurrent = () => {
-    if (listing) {
-      workspaces.openPath(listing.path).catch(() => {})
-    }
+    if (listing) openInHost(listing.path)
   }
 
   const openFile = (absPath: string) => {
-    workspaces.openPath(absPath).catch(() => {})
+    openInHost(absPath)
   }
 
   const isVault = configuredVault && listing?.path === configuredVault
@@ -123,6 +151,15 @@ export function ObsidianMemoryPanel({ workspaces, config }: PanelProps) {
       </div>
 
       {error && <div className={css.error}>{error}</div>}
+
+      {/* No vault selected yet — prompt the operator to pick one. */}
+      {!configuredVault && (
+        <div className={css.hint}>
+          No Obsidian vault selected yet. Click <b>📂 Select Vault</b> below to
+          choose the folder this plugin should browse. Your choice is remembered
+          on this device.
+        </div>
+      )}
 
       {/* Breadcrumb */}
       {listing && (

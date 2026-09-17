@@ -140,6 +140,37 @@ The five `obsidian_memory_*` tools are unaffected in every case: they are
 registered by the host half and were verified working on every version in the
 matrix above.
 
+## Vault browser and the web-profile browse capability (0.4.2)
+
+The panel lists the vault through DSH's directory service (`ctx.uiWorkspace.listDirectory`)
+and lets the operator pick a vault through `ctx.uiWorkspace.pickDirectory`. Both
+route through the host's `directoryPicker`. In the **web profile** the composed
+picker only serves the `native` capability and does **not** provide `browse`, so
+any host-filesystem listing from the browser is hard-gated:
+
+```
+directoryPicker.list needs the browse capability; the composed picker serves "native"
+```
+
+This is a DSH-platform constraint of the web profile, not a bug in this plugin.
+Consequences:
+
+- On mount the panel no longer calls `listDirectory()` with no path (that call
+  previously surfaced the raw browse-capability error). It shows the
+  "Select Vault" prompt instead, and reports the limitation in plain copy if the
+  capability is missing.
+- The host half already reads and writes the vault directly with Node `fs`
+  (the `obsidian_memory_*` tools work everywhere); only the *browser* view is
+  gated.
+- On a **native / desktop DSH** (or any transport that provides the `browse`
+  capability) `uiWorkspace.listDirectory` / `pickDirectory` work and the panel
+  shows the vault tree. That is the environment this plugin is built for.
+
+A host→client typert Remote would let the web profile show the vault too, but it
+requires the `dsh-typert-generator` codegen tooling (not present in the build
+environment) and would add a runtime dependency; it is intentionally not wired
+to avoid regressing the STORE compatibility restored in 0.4.0.
+
 ## Reproducing
 
 ```bash
